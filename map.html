@@ -382,10 +382,29 @@
         }
 
         function parseGPS(vet) {
-            const lat = parseFloat(vet.lat);
-            const lng = parseFloat(vet.lng);
+            // Clean and parse the lat/lng values
+            let lat = vet.lat;
+            let lng = vet.lng;
             
-            if (isNaN(lat) || isNaN(lng)) return null;
+            // Remove any extra whitespace
+            if (typeof lat === 'string') lat = lat.trim();
+            if (typeof lng === 'string') lng = lng.trim();
+            
+            // Convert to float
+            lat = parseFloat(lat);
+            lng = parseFloat(lng);
+            
+            // Validate
+            if (isNaN(lat) || isNaN(lng)) {
+                console.log('Invalid GPS for:', vet.name, 'Lat:', vet.lat, 'Lng:', vet.lng);
+                return null;
+            }
+            
+            // Validate ranges (rough check for Oklahoma area)
+            if (lat < 33 || lat > 37 || lng > -94 || lng < -103) {
+                console.log('Out of range GPS for:', vet.name, 'Lat:', lat, 'Lng:', lng);
+                return null;
+            }
             
             return [lat, lng];
         }
@@ -415,11 +434,14 @@
             
             let validCount = 0;
             
+            console.log('Filtering', filteredVets.length, 'veterans for map display');
+            
             filteredVets.forEach(vet => {
                 const coords = parseGPS(vet);
                 if (!coords) return;
                 
                 validCount++;
+                console.log('Adding marker for:', vet.name, 'at', coords);
                 
                 const marker = L.marker(coords, {
                     icon: L.divIcon({
@@ -438,11 +460,15 @@
                 markers.push({marker, vet});
             });
             
+            console.log('Added', validCount, 'markers to map');
+            
             document.getElementById('mapCount').textContent = validCount;
             
             if (validCount > 0 && markers.length > 0) {
                 const group = L.featureGroup(markers.map(m => m.marker));
                 map.fitBounds(group.getBounds().pad(0.1));
+            } else {
+                console.log('No valid markers to display');
             }
         }
 
