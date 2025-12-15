@@ -412,13 +412,13 @@
                         <tr>
                             <th onclick="sortTable('dateReceived')">Date Received <span class="sort-indicator" id="sort-dateReceived">↕</span></th>
                             <th onclick="sortTable('name')">Name <span class="sort-indicator" id="sort-name">↕</span></th>
-                            <th>Address</th>
+                            <th onclick="sortTable('address')">Address <span class="sort-indicator" id="sort-address">↕</span></th>
                             <th>Contact</th>
-                            <th>Email</th>
+                            <th onclick="sortTable('email')">Email <span class="sort-indicator" id="sort-email">↕</span></th>
                             <th onclick="sortTable('age')">Age <span class="sort-indicator" id="sort-age">↕</span></th>
-                            <th>Branch</th>
-                            <th>Era</th>
-                            <th>Surprise?</th>
+                            <th onclick="sortTable('branch')">Branch <span class="sort-indicator" id="sort-branch">↕</span></th>
+                            <th onclick="sortTable('era')">Era <span class="sort-indicator" id="sort-era">↕</span></th>
+                            <th onclick="sortTable('surprise')">Surprise? <span class="sort-indicator" id="sort-surprise">↕</span></th>
                             <th>Notes</th>
                         </tr>
                     </thead>
@@ -595,11 +595,17 @@
         function loadVeterans() {
             Papa.parse(SHEET_URL, {
                 download: true,
-                header: true, // Use header row to identify columns
+                header: true,
                 skipEmptyLines: true,
+                transformHeader: function(header) {
+                    return header.trim(); // Remove extra spaces
+                },
                 complete: function(results) {
+                    console.log('CSV Headers:', results.meta.fields);
+                    console.log('First row sample:', results.data[0]);
+                    
                     allVeterans = results.data.map((row, idx) => {
-                        if (!row.Veteran) return null;
+                        if (!row['Veteran']) return null;
                         
                         return {
                             id: idx,
@@ -623,6 +629,9 @@
                             notes: row['Notes'] || ''
                         };
                     }).filter(v => v !== null);
+                    
+                    console.log('Loaded veterans:', allVeterans.length);
+                    console.log('Sample veteran:', allVeterans[0]);
                     
                     // Populate era filter
                     const uniqueEras = [...new Set(allVeterans.map(v => v.era).filter(Boolean))];
