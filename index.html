@@ -605,8 +605,12 @@
                 download: true,
                 header: true,
                 skipEmptyLines: true,
+                // THIS IS THE FIX BELOW:
                 transformHeader: function(header) {
-                    return header.trim(); // Remove extra spaces
+                    // 1. Trim whitespace
+                    // 2. Replace line breaks (newlines) with a single space
+                    // 3. Replace double spaces with a single space
+                    return header.trim().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
                 },
                 complete: function(results) {
                     console.log('CSV Headers:', results.meta.fields);
@@ -619,7 +623,8 @@
                             id: idx,
                             dateReceived: row['Date Nominated'] || '',
                             name: row['Veteran'] || '',
-                            branch: row['Branch of Service'] || '',
+                            // This should now populate correctly:
+                            branch: row['Branch of Service'] || '', 
                             era: row['DATES OR ERA OF SERVICE'] || '',
                             age: row['AGE'] || '',
                             address: row['Address'] || '',
@@ -639,11 +644,13 @@
                     }).filter(v => v !== null);
                     
                     console.log('Loaded veterans:', allVeterans.length);
-                    console.log('Sample veteran:', allVeterans[0]);
                     
                     // Populate era filter
                     const uniqueEras = [...new Set(allVeterans.map(v => v.era).filter(Boolean))];
                     const eraSelect = document.getElementById('eraFilter');
+                    // Clear existing options except the first one to prevent duplicates on reload
+                    eraSelect.innerHTML = '<option value="all">All Service Eras</option>';
+                    
                     uniqueEras.forEach(era => {
                         const option = document.createElement('option');
                         option.value = era;
