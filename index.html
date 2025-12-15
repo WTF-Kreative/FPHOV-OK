@@ -413,13 +413,13 @@
                             <th onclick="sortTable('dateReceived')">Date Received <span class="sort-indicator" id="sort-dateReceived">↕</span></th>
                             <th onclick="sortTable('name')">Name <span class="sort-indicator" id="sort-name">↕</span></th>
                             <th onclick="sortTable('address')">Address <span class="sort-indicator" id="sort-address">↕</span></th>
-                            <th>Contact</th>
+                            <th onclick="sortTable('contact1')">Contact <span class="sort-indicator" id="sort-contact1">↕</span></th>
                             <th onclick="sortTable('email')">Email <span class="sort-indicator" id="sort-email">↕</span></th>
                             <th onclick="sortTable('age')">Age <span class="sort-indicator" id="sort-age">↕</span></th>
                             <th onclick="sortTable('branch')">Branch <span class="sort-indicator" id="sort-branch">↕</span></th>
                             <th onclick="sortTable('era')">Era <span class="sort-indicator" id="sort-era">↕</span></th>
                             <th onclick="sortTable('surprise')">Surprise? <span class="sort-indicator" id="sort-surprise">↕</span></th>
-                            <th>Notes</th>
+                            <th onclick="sortTable('notes')">Notes <span class="sort-indicator" id="sort-notes">↕</span></th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -561,6 +561,17 @@
             
             filteredVeterans.forEach(vet => {
                 const row = document.createElement('tr');
+                
+                // Build contact info
+                let contactHtml = '';
+                if (vet.contact1) {
+                    contactHtml += `<div><strong>${vet.contact1Name || 'Primary'}:</strong> ${vet.contact1}</div>`;
+                }
+                if (vet.contact2) {
+                    contactHtml += `<div><strong>${vet.contact2Name || 'Secondary'}:</strong> ${vet.contact2}</div>`;
+                }
+                if (!contactHtml) contactHtml = '-';
+                
                 row.innerHTML = `
                     <td>${vet.dateReceived}</td>
                     <td style="font-weight: 600;">${vet.name}</td>
@@ -568,20 +579,17 @@
                         <div>${vet.address}</div>
                         <div class="address-line2">${vet.city}, OK ${vet.zip}</div>
                     </td>
-                    <td>
-                        ${vet.contact1 ? `<div><strong>${vet.contact1Name || 'Primary'}:</strong> ${vet.contact1}</div>` : ''}
-                        ${vet.contact2 ? `<div><strong>${vet.contact2Name || 'Secondary'}:</strong> ${vet.contact2}</div>` : ''}
-                    </td>
+                    <td>${contactHtml}</td>
                     <td style="font-size: 0.875rem;">${vet.email}</td>
                     <td>${vet.age}</td>
                     <td>
-                        ${vet.branch ? `<span class="badge badge-branch">${vet.branch}</span>` : ''}
+                        ${vet.branch ? `<span class="badge badge-branch">${vet.branch}</span>` : '-'}
                     </td>
-                    <td>${vet.era}</td>
+                    <td>${vet.era || '-'}</td>
                     <td>
-                        ${vet.surprise.toLowerCase() === 'y' || vet.surprise.toLowerCase() === 'yes' ? '<span class="badge badge-surprise">SURPRISE</span>' : ''}
+                        ${vet.surprise.toLowerCase() === 'y' || vet.surprise.toLowerCase() === 'yes' ? '<span class="badge badge-surprise">SURPRISE</span>' : '-'}
                     </td>
-                    <td style="font-size: 0.875rem;">${vet.notes}</td>
+                    <td style="font-size: 0.875rem;">${vet.notes || '-'}</td>
                 `;
                 tbody.appendChild(row);
             });
