@@ -525,35 +525,50 @@
         function loadVeterans() {
             Papa.parse(SHEET_URL, {
                 download: true,
-                header: false,
+                header: true, // This forces it to read the Header Names (Lat, Long, etc)
+                skipEmptyLines: true,
+                transformHeader: function(header) {
+                    // This cleans up any hidden spaces or new lines in the headers
+                    return header.trim().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+                },
                 complete: function(results) {
-                    const rows = results.data.slice(1); // Skip header
+                    console.log('CSV Headers:', results.meta.fields);
                     
-                    allVeterans = rows.map((cols, idx) => {
-                        if (cols.length < 11 || !cols[1]) return null;
+                    allVeterans = results.data.map((row, idx) => {
+                        // Ensure we have a veteran name
+                        if (!row['Veteran']) return null;
                         
                         return {
                             id: idx,
-                            dateReceived: cols[0] || '',
-                            name: cols[1] || '',
-                            address: cols[2] || '',
-                            city: cols[3] || '',
-                            state: cols[4] || '',
-                            zip: cols[5] || '',
-                            phone: cols[6] || '',
-                            email: cols[7] || '',
-                            age: cols[8] || '',
-                            branch: cols[9] || '',
-                            era: cols[10] || '',
-                            surprise: cols[11] || '',
-                            notes: cols[12] || '',
-                            gps: cols[13] || ''
+                            dateReceived: row['Date Nominated'] || '',
+                            name: row['Veteran'] || '',
+                            // TARGETING COLUMN J and K HERE:
+                            lat: row['Lat'] || '',   // Finds the column named "Lat"
+                            lng: row['Long'] || '',  // Finds the column named "Long"
+                            
+                            address: row['Address'] || '',
+                            city: row['City'] || '',
+                            zip: row['ZIP'] || '',
+                            
+                            // Map the rest of the fields
+                            contact1Name: row['CONTACT #1 NAME (IF DIFFERENT)'] || '',
+                            contact1: row['CONTACT #1'] || '',
+                            contact2Name: row['CONTACT #2 NAME (IF DIFFERENT)'] || '',
+                            contact2: row['CONTACT #2'] || '',
+                            email: row['EMAIL'] || '',
+                            age: row['AGE'] || '',
+                            branch: row['Branch of Service'] || '',
+                            era: row['DATES OR ERA OF SERVICE'] || '',
+                            surprise: row['SURPRISE Y/N'] || '',
+                            notes: row['Notes'] || ''
                         };
                     }).filter(v => v !== null);
                     
-                    // Populate era filter
+                    // Setup the Era Filter dropdown
                     const uniqueEras = [...new Set(allVeterans.map(v => v.era).filter(Boolean))];
                     const eraSelect = document.getElementById('eraFilter');
+                    eraSelect.innerHTML = '<option value="all">All Service Eras</option>';
+                    
                     uniqueEras.forEach(era => {
                         const option = document.createElement('option');
                         option.value = era;
@@ -561,16 +576,16 @@
                         eraSelect.appendChild(option);
                     });
                     
-                    // Update stats
+                    // Update the stats numbers
                     document.getElementById('totalCount').textContent = allVeterans.length;
                     
-                    // Show map
+                    // Reveal the map
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('map').style.display = 'block';
                     
-                    // Initialize and update map
+                    // Initialize the map and plot the points
                     initMap();
-                    updateMap(allVeterans);
+                    filterVeterans(); 
                 }
             });
         }
