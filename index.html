@@ -595,33 +595,32 @@
         function loadVeterans() {
             Papa.parse(SHEET_URL, {
                 download: true,
-                header: false,
+                header: true, // Use header row to identify columns
+                skipEmptyLines: true,
                 complete: function(results) {
-                    const rows = results.data.slice(1);
-                    
-                    allVeterans = rows.map((cols, idx) => {
-                        if (cols.length < 11 || !cols[1]) return null;
+                    allVeterans = results.data.map((row, idx) => {
+                        if (!row.Veteran) return null;
                         
                         return {
                             id: idx,
-                            dateReceived: cols[0] || '',
-                            name: cols[1] || '',
-                            branch: cols[2] || '',
-                            era: cols[3] || '',
-                            age: cols[4] || '',
-                            address: cols[5] || '',
-                            city: cols[6] || '',
-                            zip: cols[7] || '',
-                            lat: cols[9] || '',
-                            lng: cols[10] || '',
-                            contact1Name: cols[11] || '',
-                            contact1: cols[12] || '',
-                            contact2Name: cols[13] || '',
-                            contact2: cols[14] || '',
-                            email: cols[15] || '',
-                            nominatedBy: cols[16] || '',
-                            surprise: cols[17] || '',
-                            notes: cols[18] || ''
+                            dateReceived: row['Date Nominated'] || '',
+                            name: row['Veteran'] || '',
+                            branch: row['Branch of Service'] || '',
+                            era: row['DATES OR ERA OF SERVICE'] || '',
+                            age: row['AGE'] || '',
+                            address: row['Address'] || '',
+                            city: row['City'] || '',
+                            zip: row['ZIP'] || '',
+                            lat: row['Lat'] || '',
+                            lng: row['Long'] || '',
+                            contact1Name: row['CONTACT #1 NAME (IF DIFFERENT)'] || '',
+                            contact1: row['CONTACT #1'] || '',
+                            contact2Name: row['CONTACT #2 NAME (IF DIFFERENT)'] || '',
+                            contact2: row['CONTACT #2'] || '',
+                            email: row['EMAIL'] || '',
+                            nominatedBy: row['Nominated by'] || '',
+                            surprise: row['SURPRISE Y/N'] || '',
+                            notes: row['Notes'] || ''
                         };
                     }).filter(v => v !== null);
                     
