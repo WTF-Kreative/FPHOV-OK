@@ -381,14 +381,9 @@
             markersLayer = L.layerGroup().addTo(map);
         }
 
-        function parseGPS(gpsString) {
-            if (!gpsString || gpsString.trim() === '') return null;
-            
-            const parts = gpsString.split(',').map(p => p.trim());
-            if (parts.length !== 2) return null;
-            
-            const lat = parseFloat(parts[0]);
-            const lng = parseFloat(parts[1]);
+        function parseGPS(vet) {
+            const lat = parseFloat(vet.lat);
+            const lng = parseFloat(vet.lng);
             
             if (isNaN(lat) || isNaN(lng)) return null;
             
@@ -400,14 +395,15 @@
                 <div class="popup-content">
                     <div class="popup-name">${vet.name}</div>
                     <div class="popup-field"><span class="popup-label">Address:</span> ${vet.address}</div>
-                    <div class="popup-field"><span class="popup-label">City:</span> ${vet.city}, ${vet.state} ${vet.zip}</div>
-                    <div class="popup-field"><span class="popup-label">Phone:</span> ${vet.phone}</div>
-                    <div class="popup-field"><span class="popup-label">Email:</span> ${vet.email}</div>
+                    <div class="popup-field"><span class="popup-label">City:</span> ${vet.city}, OK ${vet.zip}</div>
+                    ${vet.contact1 ? `<div class="popup-field"><span class="popup-label">${vet.contact1Name || 'Contact 1'}:</span> ${vet.contact1}</div>` : ''}
+                    ${vet.contact2 ? `<div class="popup-field"><span class="popup-label">${vet.contact2Name || 'Contact 2'}:</span> ${vet.contact2}</div>` : ''}
+                    ${vet.email ? `<div class="popup-field"><span class="popup-label">Email:</span> ${vet.email}</div>` : ''}
                     <div class="popup-field"><span class="popup-label">Age:</span> ${vet.age}</div>
                     <div class="popup-field"><span class="popup-label">Era:</span> ${vet.era}</div>
                     <div class="popup-field"><span class="popup-label">Date Added:</span> ${vet.dateReceived}</div>
                     ${vet.branch ? `<div><span class="badge badge-branch">${vet.branch}</span></div>` : ''}
-                    ${vet.surprise.toLowerCase() === 'yes' ? `<div><span class="badge badge-surprise">SURPRISE</span></div>` : ''}
+                    ${vet.surprise.toLowerCase() === 'y' || vet.surprise.toLowerCase() === 'yes' ? `<div><span class="badge badge-surprise">SURPRISE</span></div>` : ''}
                     ${vet.notes ? `<div class="popup-field" style="margin-top: 0.5rem;"><span class="popup-label">Notes:</span> ${vet.notes}</div>` : ''}
                 </div>
             `;
@@ -420,7 +416,7 @@
             let validCount = 0;
             
             filteredVets.forEach(vet => {
-                const coords = parseGPS(vet.gps);
+                const coords = parseGPS(vet);
                 if (!coords) return;
                 
                 validCount++;
