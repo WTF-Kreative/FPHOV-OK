@@ -46,28 +46,46 @@
         body.light-mode .stat-label { color: #6b7280; }
         .stat-value { font-size: 2rem; font-weight: bold; margin-top: 0.5rem; }
 
-        /* --- Filters --- */
+        /* --- Filters Grid --- */
         .filters { background: #1f2937; border: 1px solid #374151; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
         body.light-mode .filters { background: white; border-color: #e5e7eb; }
         .search-box { width: 100%; padding: 0.75rem; border: 1px solid #374151; border-radius: 0.5rem; background: #374151; color: #f3f4f6; margin-bottom: 1rem; font-size: 1rem; }
         body.light-mode .search-box { background: white; border-color: #d1d5db; color: #111827; }
-        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; align-items: center; }
         
-        select { width: 100%; padding: 0.75rem; border: 1px solid #374151; border-radius: 0.5rem; background: #374151; color: #f3f4f6; font-size: 0.875rem; }
-        body.light-mode select { background: white; border-color: #d1d5db; color: #111827; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+        .filter-label { font-size: 0.875rem; font-weight: 600; color: #9ca3af; display: block; margin-bottom: 0.25rem; }
+        body.light-mode .filter-label { color: #6b7280; }
 
-        /* --- Year Toggles --- */
-        .year-filter-container { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-        .year-btn {
-            background: #374151; border: 1px solid #4b5563; color: #f3f4f6;
-            padding: 0.5rem 1rem; border-radius: 2rem; cursor: pointer; font-size: 0.875rem;
-            transition: all 0.2s;
+        /* --- Custom Multi-Select Dropdown Styles --- */
+        .custom-dropdown { position: relative; width: 100%; }
+        
+        .dropdown-btn {
+            background: #374151; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #4b5563;
+            color: #f3f4f6; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            user-select: none;
         }
-        body.light-mode .year-btn { background: white; border-color: #d1d5db; color: #111827; }
-        .year-btn:hover { background: #4b5563; }
-        body.light-mode .year-btn:hover { background: #f3f4f6; }
-        .year-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
-        .filter-label { font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.25rem; display: block; }
+        body.light-mode .dropdown-btn { background: white; border-color: #d1d5db; color: #111827; }
+        
+        .dropdown-content {
+            display: none; position: absolute; top: 105%; left: 0; right: 0;
+            background: #374151; border: 1px solid #4b5563; z-index: 100;
+            max-height: 300px; overflow-y: auto; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        body.light-mode .dropdown-content { background: white; border-color: #d1d5db; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        
+        .dropdown-content.show { display: block; }
+        
+        .dropdown-item {
+            padding: 0.75rem; display: flex; gap: 0.75rem; align-items: center; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        body.light-mode .dropdown-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .dropdown-item:hover { background: rgba(255,255,255,0.1); }
+        body.light-mode .dropdown-item:hover { background: rgba(0,0,0,0.05); }
+        .dropdown-item:last-child { border-bottom: none; }
+        
+        .dropdown-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
 
         /* --- Table Styles --- */
         .table-container { background: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden; }
@@ -167,28 +185,42 @@
 
         <div class="filters">
             <input type="text" id="search" class="search-box" placeholder="Search all fields...">
+            
             <div class="filter-grid">
                 <div>
-                    <label class="filter-label">Nomination Year (Select Multiple)</label>
-                    <div id="yearFilters" class="year-filter-container">
+                    <label class="filter-label">Nomination Year</label>
+                    <div class="custom-dropdown" id="dd-year">
+                        <div class="dropdown-btn" onclick="toggleDropdown('year')">
+                            <span id="btn-text-year">All Years</span>
+                            <span>▼</span>
                         </div>
+                        <div class="dropdown-content" id="list-year">
+                            </div>
+                    </div>
                 </div>
 
                 <div>
                     <label class="filter-label">Service Era</label>
-                    <select id="eraFilter"><option value="all">All Service Eras</option></select>
+                    <div class="custom-dropdown" id="dd-era">
+                        <div class="dropdown-btn" onclick="toggleDropdown('era')">
+                            <span id="btn-text-era">All Service Eras</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="dropdown-content" id="list-era">
+                            </div>
+                    </div>
                 </div>
 
                 <div>
                     <label class="filter-label">Age Group</label>
-                    <select id="ageFilter">
-                        <option value="all">All Ages</option>
-                        <option value="90+">90+ years</option>
-                        <option value="80-89">80-89 years</option>
-                        <option value="70-79">70-79 years</option>
-                        <option value="60-69">60-69 years</option>
-                        <option value="under60">Under 60</option>
-                    </select>
+                    <div class="custom-dropdown" id="dd-age">
+                        <div class="dropdown-btn" onclick="toggleDropdown('age')">
+                            <span id="btn-text-age">All Ages</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="dropdown-content" id="list-age">
+                            </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -246,8 +278,19 @@
         let allVeterans = [];
         let filteredVeterans = [];
         let sortConfig = { key: 'dateReceived', direction: 'desc' };
+        
+        // Data for Filters
         let uniqueYears = [];
-        let selectedYears = new Set();
+        let uniqueEras = [];
+        
+        // Active Filter State
+        let activeFilters = {
+            years: new Set(),
+            eras: new Set(),
+            ages: new Set()
+        };
+
+        // Selection State
         let selectedVeterans = new Set();
 
         function toggleDarkMode() {
@@ -264,6 +307,105 @@
             }
         }
 
+        // --- Custom Dropdown Logic ---
+        function toggleDropdown(type) {
+            // Close others
+            const allDropdowns = document.querySelectorAll('.dropdown-content');
+            const current = document.getElementById(`list-${type}`);
+            
+            allDropdowns.forEach(dd => {
+                if (dd !== current) dd.classList.remove('show');
+            });
+            
+            current.classList.toggle('show');
+        }
+
+        // Close dropdowns when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *')) {
+                // Allow clicking inside the dropdown content without closing
+                if (!event.target.closest('.dropdown-content')) {
+                    const dropdowns = document.querySelectorAll('.dropdown-content');
+                    dropdowns.forEach(dd => dd.classList.remove('show'));
+                }
+            }
+        }
+
+        function createCheckbox(type, value, label) {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerHTML = `
+                <input type="checkbox" onchange="toggleFilter('${type}', '${value}', this)">
+                <span>${label}</span>
+            `;
+            // Handle clicking the text/row
+            div.onclick = (e) => {
+                if(e.target.tagName !== 'INPUT') {
+                    const cb = div.querySelector('input');
+                    cb.checked = !cb.checked;
+                    toggleFilter(type, value, cb);
+                }
+            };
+            return div;
+        }
+
+        function populateDropdowns() {
+            // Years
+            const yearList = document.getElementById('list-year');
+            yearList.innerHTML = '';
+            uniqueYears.sort((a,b) => a - b);
+            uniqueYears.forEach(year => {
+                yearList.appendChild(createCheckbox('year', year, year));
+            });
+
+            // Eras
+            const eraList = document.getElementById('list-era');
+            eraList.innerHTML = '';
+            uniqueEras.sort();
+            uniqueEras.forEach(era => {
+                eraList.appendChild(createCheckbox('era', era, era));
+            });
+
+            // Ages (Granular Buckets)
+            const ageList = document.getElementById('list-age');
+            ageList.innerHTML = '';
+            const ageBuckets = ['90+', '80-89', '70-79', '60-69', '50-59', '40-49', '20-39'];
+            const ageLabels = ['90+ Years', '80-89 Years', '70-79 Years', '60-69 Years', '50-59 Years', '40-49 Years', '20-39 Years'];
+            
+            ageBuckets.forEach((bucket, idx) => {
+                ageList.appendChild(createCheckbox('age', bucket, ageLabels[idx]));
+            });
+        }
+
+        function toggleFilter(type, value, checkbox) {
+            let filterSet;
+            let btnTextId;
+            let defaultText;
+
+            if (type === 'year') { filterSet = activeFilters.years; btnTextId = 'btn-text-year'; defaultText = 'All Years'; }
+            if (type === 'era') { filterSet = activeFilters.eras; btnTextId = 'btn-text-era'; defaultText = 'All Service Eras'; }
+            if (type === 'age') { filterSet = activeFilters.ages; btnTextId = 'btn-text-age'; defaultText = 'All Ages'; }
+
+            if (checkbox.checked) {
+                filterSet.add(value);
+            } else {
+                filterSet.delete(value);
+            }
+
+            // Update Button Text
+            const btnText = document.getElementById(btnTextId);
+            if (filterSet.size === 0) {
+                btnText.textContent = defaultText;
+            } else if (filterSet.size === 1) {
+                btnText.textContent = `${filterSet.size} Selected`;
+                if(type === 'year' || type === 'era') btnText.textContent = Array.from(filterSet)[0];
+            } else {
+                btnText.textContent = `${filterSet.size} Selected`;
+            }
+
+            filterAndRender();
+        }
+
         // --- Selection Logic ---
         function toggleVeteranSelection(vetId) {
             if (selectedVeterans.has(vetId)) {
@@ -271,7 +413,6 @@
             } else {
                 selectedVeterans.add(vetId);
             }
-            // Re-render only checkboxes might be faster, but full render is safe
             renderTable(); 
             updateSelectionUI();
         }
@@ -365,33 +506,6 @@
             doc.save('veteran_install_list.pdf');
         }
 
-        // --- Year Filter Logic ---
-        function toggleYearFilter(year) {
-            const btn = document.getElementById(`year-btn-${year}`);
-            if (selectedYears.has(year)) {
-                selectedYears.delete(year);
-                btn.classList.remove('active');
-            } else {
-                selectedYears.add(year);
-                btn.classList.add('active');
-            }
-            filterAndRender();
-        }
-
-        function createYearButtons() {
-            const container = document.getElementById('yearFilters');
-            container.innerHTML = '';
-            uniqueYears.sort((a,b) => a - b);
-            uniqueYears.forEach(year => {
-                const btn = document.createElement('button');
-                btn.className = 'year-btn';
-                btn.id = `year-btn-${year}`;
-                btn.textContent = year;
-                btn.onclick = () => toggleYearFilter(year);
-                container.appendChild(btn);
-            });
-        }
-
         // --- Table Logic ---
 
         function sortTable(key) {
@@ -418,36 +532,41 @@
 
         function filterVeterans() {
             const searchTerm = document.getElementById('search').value.toLowerCase();
-            const eraFilter = document.getElementById('eraFilter').value;
-            const ageFilter = document.getElementById('ageFilter').value;
             
             filteredVeterans = allVeterans.filter(vet => {
-                // Search filter
+                // Search
                 if (searchTerm) {
                     const searchableText = Object.values(vet).join(' ').toLowerCase();
                     if (!searchableText.includes(searchTerm)) return false;
                 }
                 
-                // Era filter
-                if (eraFilter !== 'all' && vet.era !== eraFilter) return false;
+                // Year Filter
+                if (activeFilters.years.size > 0) {
+                    if (!vet.nominationYear || !activeFilters.years.has(vet.nominationYear)) return false;
+                }
 
-                // Year Filter logic
-                if (selectedYears.size > 0) {
-                    if (!vet.nominationYear || !selectedYears.has(vet.nominationYear)) return false;
+                // Era Filter
+                if (activeFilters.eras.size > 0) {
+                    if (!vet.era || !activeFilters.eras.has(vet.era)) return false;
                 }
                 
-                // Age filter
-                if (ageFilter !== 'all') {
+                // Age Filter
+                if (activeFilters.ages.size > 0) {
                     const age = parseInt(vet.age);
                     if (isNaN(age)) return false;
-                    switch(ageFilter) {
-                        case '90+': if (age < 90) return false; break;
-                        case '80-89': if (age < 80 || age >= 90) return false; break;
-                        case '70-79': if (age < 70 || age >= 80) return false; break;
-                        case '60-69': if (age < 60 || age >= 70) return false; break;
-                        case 'under60': if (age >= 60) return false; break;
-                    }
+                    
+                    let matched = false;
+                    if (activeFilters.ages.has('90+') && age >= 90) matched = true;
+                    if (activeFilters.ages.has('80-89') && age >= 80 && age < 90) matched = true;
+                    if (activeFilters.ages.has('70-79') && age >= 70 && age < 80) matched = true;
+                    if (activeFilters.ages.has('60-69') && age >= 60 && age < 70) matched = true;
+                    if (activeFilters.ages.has('50-59') && age >= 50 && age < 60) matched = true;
+                    if (activeFilters.ages.has('40-49') && age >= 40 && age < 50) matched = true;
+                    if (activeFilters.ages.has('20-39') && age >= 20 && age < 40) matched = true;
+                    
+                    if (!matched) return false;
                 }
+
                 return true;
             });
             
@@ -533,6 +652,7 @@
                 },
                 complete: function(results) {
                     let tempYears = new Set();
+                    let tempEras = new Set();
 
                     allVeterans = results.data.map((row, idx) => {
                         if (!row['Veteran']) return null;
@@ -546,6 +666,9 @@
                                 tempYears.add(year);
                             }
                         }
+                        
+                        // Collect Era
+                        if (row['DATES OR ERA OF SERVICE']) tempEras.add(row['DATES OR ERA OF SERVICE']);
 
                         return {
                             id: idx,
@@ -569,20 +692,10 @@
                         };
                     }).filter(v => v !== null);
                     
-                    // Populate years
+                    // Populate Filter Data
                     uniqueYears = Array.from(tempYears);
-                    createYearButtons();
-                    
-                    // Populate era filter
-                    const uniqueEras = [...new Set(allVeterans.map(v => v.era).filter(Boolean))];
-                    const eraSelect = document.getElementById('eraFilter');
-                    eraSelect.innerHTML = '<option value="all">All Service Eras</option>';
-                    uniqueEras.forEach(era => {
-                        const option = document.createElement('option');
-                        option.value = era;
-                        option.textContent = era;
-                        eraSelect.appendChild(option);
-                    });
+                    uniqueEras = Array.from(tempEras).filter(Boolean);
+                    populateDropdowns();
                     
                     // Update stats
                     document.getElementById('totalCount').textContent = allVeterans.length;
@@ -594,8 +707,6 @@
         }
 
         document.getElementById('search').addEventListener('input', filterAndRender);
-        document.getElementById('eraFilter').addEventListener('change', filterAndRender);
-        document.getElementById('ageFilter').addEventListener('change', filterAndRender);
 
         loadVeterans();
     </script>
