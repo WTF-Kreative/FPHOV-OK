@@ -236,7 +236,7 @@
                     <thead>
                         <tr>
                             <th class="checkbox-col">Select</th>
-                            <th onclick="sortTable('dateReceived')">Date Received <span class="sort-indicator" id="sort-dateReceived">↕</span></th>
+                            <th onclick="sortTable('dateReceived')">Date Received <span class="sort-indicator" id="sort-dateReceived">↑</span></th>
                             <th onclick="sortTable('name')">Name <span class="sort-indicator" id="sort-name">↕</span></th>
                             <th onclick="sortTable('address')">Address <span class="sort-indicator" id="sort-address">↕</span></th>
                             <th onclick="sortTable('contact1')">Contact <span class="sort-indicator" id="sort-contact1">↕</span></th>
@@ -277,7 +277,8 @@
         
         let allVeterans = [];
         let filteredVeterans = [];
-        let sortConfig = { key: 'dateReceived', direction: 'desc' };
+        // FIX: Default sort to 'asc' so Oldest Dates are at the top
+        let sortConfig = { key: 'dateReceived', direction: 'asc' };
         
         // Data for Filters
         let uniqueYears = [];
@@ -387,7 +388,7 @@
                 filterSet = activeFilters.years; 
                 btnTextId = 'btn-text-year'; 
                 defaultText = 'All Years'; 
-                value = parseInt(value); 
+                value = parseInt(value); // Important Fix
             }
             if (type === 'era') { filterSet = activeFilters.eras; btnTextId = 'btn-text-era'; defaultText = 'All Service Eras'; }
             if (type === 'age') { filterSet = activeFilters.ages; btnTextId = 'btn-text-age'; defaultText = 'All Ages'; }
@@ -409,7 +410,8 @@
                 btnText.textContent = `${filterSet.size} Selected`;
             }
 
-            filterVeterans();
+            // FIX: Call filterAndRender immediately
+            filterAndRender();
         }
 
         // --- Selection Logic ---
