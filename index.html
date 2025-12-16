@@ -42,12 +42,30 @@
 
         .container { max-width: 98%; margin: 0 auto; padding: 1.5rem; padding-bottom: 100px; }
 
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-        .stat-card { background: rgba(31, 41, 55, 0.95); border: 1px solid #374151; padding: 1rem; border-radius: 0.5rem; }
-        body.light-mode .stat-card { background: rgba(255, 255, 255, 0.95); border-color: #e5e7eb; }
-        .stat-label { color: #9ca3af; font-size: 0.875rem; }
-        body.light-mode .stat-label { color: #6b7280; }
-        .stat-value { font-size: 2rem; font-weight: bold; margin-top: 0.5rem; }
+        /* Data Health Dashboard */
+        .dashboard-grid { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 1rem; margin-bottom: 1.5rem; 
+        }
+        .dash-card {
+            background: rgba(31, 41, 55, 0.95); border: 1px solid #374151;
+            padding: 1rem; border-radius: 0.5rem; cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            text-align: center;
+        }
+        body.light-mode .dash-card { background: rgba(255, 255, 255, 0.95); border-color: #e5e7eb; }
+        .dash-card:hover { transform: translateY(-2px); border-color: #3b82f6; }
+        .dash-card.active { border-color: #3b82f6; background: rgba(37, 99, 235, 0.1); }
+        
+        .dash-value { font-size: 1.5rem; font-weight: bold; margin-bottom: 0.25rem; }
+        .dash-label { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
+        body.light-mode .dash-label { color: #6b7280; }
+        
+        /* Color coding for cards */
+        .text-blue { color: #3b82f6; }
+        .text-yellow { color: #eab308; }
+        .text-red { color: #ef4444; }
+        .text-purple { color: #a855f7; }
 
         .filters { background: rgba(31, 41, 55, 0.95); border: 1px solid #374151; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
         body.light-mode .filters { background: rgba(255, 255, 255, 0.95); border-color: #e5e7eb; }
@@ -104,7 +122,6 @@
         .badge-branch { background: #dbeafe; color: #1e40af; }
         .badge-surprise { background: #fef3c7; color: #92400e; }
 
-        /* --- Sidebar & Mobile Review Button --- */
         .sidebar {
             position: fixed; top: 0; right: -400px; width: 350px; height: 100vh;
             background: rgba(31, 41, 55, 0.98); border-left: 1px solid #374151;
@@ -114,40 +131,26 @@
         }
         body.light-mode .sidebar { background: rgba(255, 255, 255, 0.98); border-color: #e5e7eb; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         .sidebar.active { right: 0; }
-        
-        /* Mobile: Sidebar takes full width */
-        @media (max-width: 768px) {
-            .sidebar { width: 100%; right: -100%; }
-            .sidebar.active { right: 0; }
-        }
+        @media (max-width: 768px) { .sidebar { width: 100%; right: -100%; } .sidebar.active { right: 0; } }
 
         .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
         body.light-mode .sidebar-header { border-color: #e5e7eb; }
-        .sidebar-close { cursor: pointer; font-size: 1.5rem; font-weight: bold; }
-        
+        .sidebar-close { cursor: pointer; font-size: 1.5rem; font-weight: bold; padding: 0.5rem; }
         .sidebar-content { flex: 1; overflow-y: auto; padding: 1rem; }
-        .selected-item { 
-            background: #374151; padding: 0.75rem; margin-bottom: 0.5rem; 
-            border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start;
-        }
+        .selected-item { background: #374151; padding: 0.75rem; margin-bottom: 0.5rem; border-radius: 0.5rem; display: flex; justify-content: space-between; align-items: flex-start; }
         body.light-mode .selected-item { background: #f3f4f6; border: 1px solid #e5e7eb; }
         .remove-btn { color: #dc2626; cursor: pointer; padding: 0 0.5rem; font-weight: bold; font-size: 1.2rem; }
-        .sidebar-footer { padding: 1.5rem; border-top: 1px solid #374151; }
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid #374151; padding-bottom: calc(1.5rem + env(safe-area-inset-bottom)); }
         body.light-mode .sidebar-footer { border-color: #e5e7eb; }
         .btn-action { width: 100%; padding: 0.75rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; margin-bottom: 0.5rem; }
         .btn-export { background: #16a34a; color: white; }
         .btn-clear { background: #dc2626; color: white; }
 
-        /* Floating Review Button (Mobile Friendly) */
-        .btn-review-fab {
-            position: fixed; bottom: 20px; right: 20px;
-            background: #2563eb; color: white;
-            padding: 1rem 1.5rem; border-radius: 2rem;
-            font-weight: bold; border: none; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            z-index: 1400; cursor: pointer;
-            display: none; /* Hidden until items selected */
-        }
+        .floating-controls { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); z-index: 1400; }
+        .btn-select-mode { background: #374151; color: white; padding: 0.75rem 1.5rem; border-radius: 2rem; border: 1px solid #4b5563; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; }
+        .btn-select-mode.active { background: #d97706; border-color: #f59e0b; }
+
+        .btn-review-fab { position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); right: 20px; background: #2563eb; color: white; padding: 1rem 1.5rem; border-radius: 2rem; font-weight: bold; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1400; cursor: pointer; display: none; }
         .btn-review-fab:hover { background: #1d4ed8; }
 
         .loading { text-align: center; padding: 3rem; }
@@ -168,12 +171,8 @@
             </div>
             <div class="controls">
                 <button class="mode-toggle" onclick="toggleDarkMode()">
-                    <svg id="moon-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
-                    </svg>
-                    <svg id="sun-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
+                    <svg id="moon-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg id="sun-icon" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                 </button>
                 <a href="map.html" class="nav-button">🗺️ Map View</a>
             </div>
@@ -181,45 +180,60 @@
     </div>
 
     <div class="container">
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-label">Total Veterans Waiting</div>
-                <div class="stat-value" style="color: #2563eb;" id="totalCount">-</div>
+        <div class="dashboard-grid">
+            <div class="dash-card" onclick="applyQuickFilter('total')">
+                <div class="dash-value text-blue" id="count-total">0</div>
+                <div class="dash-label">Total Waiting</div>
+            </div>
+            <div class="dash-card" onclick="applyQuickFilter('no-address')">
+                <div class="dash-value text-red" id="count-no-address">0</div>
+                <div class="dash-label">Missing Address</div>
+            </div>
+            <div class="dash-card" onclick="applyQuickFilter('no-gps')">
+                <div class="dash-value text-yellow" id="count-no-gps">0</div>
+                <div class="dash-label">Unmapped (No GPS)</div>
+            </div>
+            <div class="dash-card" onclick="applyQuickFilter('no-contact')">
+                <div class="dash-value text-red" id="count-no-contact">0</div>
+                <div class="dash-label">Missing Contact</div>
+            </div>
+            <div class="dash-card" onclick="applyQuickFilter('no-email')">
+                <div class="dash-value text-yellow" id="count-no-email">0</div>
+                <div class="dash-label">Missing Email</div>
+            </div>
+            <div class="dash-card" onclick="applyQuickFilter('no-data')">
+                <div class="dash-value text-purple" id="count-no-data">0</div>
+                <div class="dash-label">Missing Age/Era</div>
             </div>
         </div>
 
         <div class="filters">
-            <input type="text" id="search" class="search-box" placeholder="Search all fields...">
+            <input type="text" id="search" class="search-box" placeholder="Search by name, address, city, notes...">
             
             <div class="filter-grid">
                 <div>
                     <label class="filter-label">Nomination Year</label>
                     <div class="custom-dropdown" id="dd-year">
                         <div class="dropdown-btn" onclick="toggleDropdown('year')">
-                            <span id="btn-text-year">All Years</span>
-                            <span>▼</span>
+                            <span id="btn-text-year">All Years</span><span>▼</span>
                         </div>
                         <div class="dropdown-content" id="list-year"></div>
                     </div>
                 </div>
-
                 <div>
                     <label class="filter-label">Service Era</label>
                     <div class="custom-dropdown" id="dd-era">
                         <div class="dropdown-btn" onclick="toggleDropdown('era')">
-                            <span id="btn-text-era">All Service Eras</span>
-                            <span>▼</span>
+                            <span id="btn-text-era">All Service Eras</span><span>▼</span>
                         </div>
                         <div class="dropdown-content" id="list-era"></div>
                     </div>
                 </div>
-
                 <div>
                     <label class="filter-label">Age Group</label>
                     <div class="custom-dropdown" id="dd-age">
                         <div class="dropdown-btn" onclick="toggleDropdown('age')">
-                            <span id="btn-text-age">All Ages</span>
-                            <span>▼</span>
+                            <span id="btn-text-age">All Ages</span><span>▼</span>
                         </div>
                         <div class="dropdown-content" id="list-age"></div>
                     </div>
@@ -260,6 +274,10 @@
         </div>
     </div>
 
+    <div class="floating-controls">
+        <button id="btnSelectMode" class="btn-select-mode" onclick="toggleSelectionMode()">Select Mode: OFF</button>
+    </div>
+
     <button id="btnReview" class="btn-review-fab" onclick="openSidebar()">
         Review (<span id="fabCount">0</span>)
     </button>
@@ -291,6 +309,10 @@
         
         let activeFilters = { years: new Set(), eras: new Set(), ages: new Set() };
         let selectedVeterans = new Set();
+        let isSelectionMode = false;
+        
+        // Quick Filter State
+        let activeQuickFilter = 'total'; 
 
         function toggleDarkMode() {
             document.body.classList.toggle('light-mode');
@@ -305,7 +327,6 @@
             }
         }
 
-        // --- Custom Dropdown Logic ---
         function toggleDropdown(type) {
             const allDropdowns = document.querySelectorAll('.dropdown-content');
             const current = document.getElementById(`list-${type}`);
@@ -372,10 +393,69 @@
                 if(type === 'year' || type === 'era') btnText.textContent = Array.from(filterSet)[0];
             } else btnText.textContent = `${filterSet.size} Selected`;
 
+            // Reset quick filter if user manually filters
+            if (activeQuickFilter !== 'total') {
+                activeQuickFilter = 'total';
+                updateDashboardUI();
+            }
             filterAndRender();
         }
 
-        // --- Selection & Sidebar Logic ---
+        // --- Quick Filter Dashboard Logic ---
+        function updateDashboardCounts() {
+            document.getElementById('count-total').textContent = allVeterans.length;
+            
+            const noAddr = allVeterans.filter(v => !v.address || v.address.trim() === '').length;
+            document.getElementById('count-no-address').textContent = noAddr;
+
+            const noGPS = allVeterans.filter(v => !v.lat || !v.lng).length;
+            document.getElementById('count-no-gps').textContent = noGPS;
+
+            const noContact = allVeterans.filter(v => !v.contact1 && !v.email).length;
+            document.getElementById('count-no-contact').textContent = noContact;
+
+            const noEmail = allVeterans.filter(v => !v.email).length;
+            document.getElementById('count-no-email').textContent = noEmail;
+
+            const noData = allVeterans.filter(v => !v.age || !v.era).length;
+            document.getElementById('count-no-data').textContent = noData;
+        }
+
+        function applyQuickFilter(type) {
+            activeQuickFilter = type;
+            updateDashboardUI();
+            filterAndRender();
+        }
+
+        function updateDashboardUI() {
+            // Remove active class from all
+            document.querySelectorAll('.dash-card').forEach(c => c.classList.remove('active'));
+            // Add to selected
+            if (activeQuickFilter === 'total') document.querySelector('.dash-card:nth-child(1)').classList.add('active');
+            if (activeQuickFilter === 'no-address') document.querySelector('.dash-card:nth-child(2)').classList.add('active');
+            if (activeQuickFilter === 'no-gps') document.querySelector('.dash-card:nth-child(3)').classList.add('active');
+            if (activeQuickFilter === 'no-contact') document.querySelector('.dash-card:nth-child(4)').classList.add('active');
+            if (activeQuickFilter === 'no-email') document.querySelector('.dash-card:nth-child(5)').classList.add('active');
+            if (activeQuickFilter === 'no-data') document.querySelector('.dash-card:nth-child(6)').classList.add('active');
+        }
+
+        // --- Selection & Sidebar ---
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            const btn = document.getElementById('btnSelectMode');
+            const sidebar = document.getElementById('sidebar');
+            
+            if (isSelectionMode) {
+                btn.classList.add('active');
+                btn.textContent = "Select Mode: ON";
+                if (selectedVeterans.size > 0 && window.innerWidth > 768) sidebar.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = "Select Mode: OFF";
+                sidebar.classList.remove('active');
+            }
+        }
+
         function toggleVeteranSelection(vetId) {
             if (selectedVeterans.has(vetId)) selectedVeterans.delete(vetId);
             else selectedVeterans.add(vetId);
@@ -389,19 +469,13 @@
             updateSelectionUI();
         }
 
-        function openSidebar() {
-            document.getElementById('sidebar').classList.add('active');
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('active');
-        }
+        function openSidebar() { document.getElementById('sidebar').classList.add('active'); }
+        function closeSidebar() { document.getElementById('sidebar').classList.remove('active'); }
 
         function updateSelectionUI() {
             const count = selectedVeterans.size;
             document.getElementById('sidebarCount').textContent = count;
             document.getElementById('fabCount').textContent = count;
-            
             const sidebar = document.getElementById('sidebar');
             const sidebarList = document.getElementById('sidebarList');
             const fab = document.getElementById('btnReview');
@@ -414,7 +488,6 @@
                     sidebar.classList.add('active');
                     fab.style.display = 'none';
                 }
-                
                 const selectedData = allVeterans.filter(v => selectedVeterans.has(v.id));
                 selectedData.forEach(vet => {
                     const div = document.createElement('div');
@@ -438,14 +511,12 @@
             if (selectedVeterans.size === 0) return;
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('l', 'mm', 'a4');
-
             doc.setFontSize(14);
             doc.text("FPHOV - Veteran Installation List", 14, 15);
             doc.setFontSize(10);
             doc.text(`Generated: ${new Date().toLocaleDateString()} | Total: ${selectedVeterans.size}`, 14, 22);
 
             const selectedData = allVeterans.filter(v => selectedVeterans.has(v.id));
-            
             const tableBody = selectedData.map(v => {
                 const fullAddress = `${v.address}\n${v.city}, OK ${v.zip}`;
                 let contactInfo = '';
@@ -484,11 +555,9 @@
                 sortConfig.key = key;
                 sortConfig.direction = 'asc';
             }
-            
             document.querySelectorAll('.sort-indicator').forEach(el => { el.textContent = '↕'; el.style.opacity = '0.5'; });
             const indicator = document.getElementById(`sort-${key}`);
             if (indicator) { indicator.textContent = sortConfig.direction === 'asc' ? '↑' : '↓'; indicator.style.opacity = '1'; }
-            
             filterAndRender();
         }
 
@@ -496,6 +565,24 @@
             const searchTerm = document.getElementById('search').value.toLowerCase();
             
             filteredVeterans = allVeterans.filter(vet => {
+                // Quick Filters Logic
+                if (activeQuickFilter === 'no-address') {
+                    if (vet.address && vet.address.trim() !== '') return false;
+                }
+                if (activeQuickFilter === 'no-gps') {
+                    if (vet.lat && vet.lng) return false;
+                }
+                if (activeQuickFilter === 'no-contact') {
+                    if (vet.contact1 || vet.email) return false;
+                }
+                if (activeQuickFilter === 'no-email') {
+                    if (vet.email) return false;
+                }
+                if (activeQuickFilter === 'no-data') {
+                    if (vet.age && vet.era) return false;
+                }
+
+                // Standard Filters
                 if (searchTerm) {
                     const searchableText = Object.values(vet).join(' ').toLowerCase();
                     if (!searchableText.includes(searchTerm)) return false;
@@ -523,7 +610,6 @@
                 return true;
             });
             
-            // Sort
             filteredVeterans.sort((a, b) => {
                 let aVal = a[sortConfig.key];
                 let bVal = b[sortConfig.key];
@@ -594,7 +680,9 @@
 
         function loadVeterans() {
             Papa.parse(SHEET_URL, {
-                download: true, header: true, skipEmptyLines: true,
+                download: true,
+                header: true,
+                skipEmptyLines: true,
                 transformHeader: function(header) { return header.trim().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' '); },
                 complete: function(results) {
                     let tempYears = new Set();
@@ -608,7 +696,6 @@
                             const d = new Date(row['Date Nominated']);
                             if (!isNaN(d)) { year = d.getFullYear(); tempYears.add(year); }
                         }
-                        
                         if (row['DATES OR ERA OF SERVICE']) tempEras.add(row['DATES OR ERA OF SERVICE']);
 
                         return {
@@ -616,11 +703,18 @@
                             dateReceived: row['Date Nominated'] || '',
                             nominationYear: year,
                             name: row['Veteran'] || '',
-                            branch: row['Branch of Service'] || '', era: row['DATES OR ERA OF SERVICE'] || '',
+                            branch: row['Branch of Service'] || '', 
+                            era: row['DATES OR ERA OF SERVICE'] || '',
                             age: row['AGE'] || '',
-                            address: row['Address'] || '', city: row['City'] || '', zip: row['ZIP'] || '',
-                            contact1Name: row['CONTACT #1 NAME (IF DIFFERENT)'] || '', contact1: row['CONTACT #1'] || '',
-                            contact2Name: row['CONTACT #2 NAME (IF DIFFERENT)'] || '', contact2: row['CONTACT #2'] || '',
+                            address: row['Address'] || '',
+                            city: row['City'] || '',
+                            zip: row['ZIP'] || '',
+                            lat: row['Lat'],
+                            lng: row['Long'],
+                            contact1Name: row['CONTACT #1 NAME (IF DIFFERENT)'] || '',
+                            contact1: row['CONTACT #1'] || '',
+                            contact2Name: row['CONTACT #2 NAME (IF DIFFERENT)'] || '',
+                            contact2: row['CONTACT #2'] || '',
                             email: row['EMAIL'] || '',
                             nominatedBy: row['Nominated by'] || '',
                             surprise: row['SURPRISE Y/N'] || '',
@@ -632,7 +726,7 @@
                     uniqueEras = Array.from(tempEras).filter(Boolean);
                     populateDropdowns();
                     
-                    document.getElementById('totalCount').textContent = allVeterans.length;
+                    updateDashboardCounts(); // Update Dashboard Stats
                     document.getElementById('loading').style.display = 'none';
                     
                     filterAndRender();
