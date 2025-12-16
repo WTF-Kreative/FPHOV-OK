@@ -142,10 +142,6 @@
                 </div>
                 <a class="stat-link" onclick="openUnmappedModal()">View Unmapped Veterans</a>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Installations Completed</div>
-                <div class="stat-value" style="color: #16a34a;" id="completedCount">0</div>
-            </div>
         </div>
 
         <div class="filters">
@@ -235,7 +231,7 @@
             }
         }
 
-        function toggleVeteranSelection(vetId, markerIconDiv) {
+        function toggleVeteranSelection(vetId) {
             if (selectedVeterans.has(vetId)) {
                 selectedVeterans.delete(vetId);
             } else {
@@ -274,7 +270,7 @@
 
             // Initialize jsPDF
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation for more columns
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation
 
             // Title
             doc.setFontSize(18);
@@ -286,7 +282,6 @@
             const selectedData = allVeterans.filter(v => selectedVeterans.has(v.id));
             
             const tableBody = selectedData.map(v => {
-                // Formatting specific fields
                 const fullAddress = `${v.address}\n${v.city}, OK ${v.zip}`;
                 const contactInfo = `${v.contact1Name || 'Primary'}: ${v.contact1}\n${v.contact2 ? (v.contact2Name || 'Secondary') + ': ' + v.contact2 : ''}`;
                 const serviceInfo = `${v.branch}\n${v.era}`;
@@ -309,19 +304,19 @@
                 styles: { 
                     fontSize: 10, 
                     cellPadding: 3, 
-                    overflow: 'linebreak', // Ensure text wraps
+                    overflow: 'linebreak',
                     valign: 'top'
                 },
                 columnStyles: {
-                    0: { cellWidth: 35, fontStyle: 'bold' }, // Name
-                    1: { cellWidth: 50 }, // Address
-                    2: { cellWidth: 50 }, // Contact
-                    3: { cellWidth: 30 }, // Service
-                    4: { cellWidth: 20 }, // Surprise
-                    5: { cellWidth: 'auto' } // Notes (Takes remaining space)
+                    0: { cellWidth: 35, fontStyle: 'bold' },
+                    1: { cellWidth: 50 },
+                    2: { cellWidth: 50 },
+                    3: { cellWidth: 30 },
+                    4: { cellWidth: 20 },
+                    5: { cellWidth: 'auto' }
                 },
                 theme: 'grid',
-                headStyles: { fillColor: [30, 64, 175] } // Blue header matching theme
+                headStyles: { fillColor: [30, 64, 175] }
             });
 
             // Save
@@ -374,7 +369,7 @@
             lng = parseFloat(lng);
             
             if (isNaN(lat) || isNaN(lng)) return null;
-            if (lat < 25 || lat > 50 || lng > -65 || lng < -125) return null; // Rough USA bounds
+            if (lat < 25 || lat > 50 || lng > -65 || lng < -125) return null;
             return [lat, lng];
         }
 
@@ -413,27 +408,26 @@
                         iconAnchor: [12, 12]
                     })
                 });
-                
-                // Click Handler
+
+                // --- KEY FIX FOR POPUP VS SELECT ---
+                // Bind popup to all markers
+                marker.bindPopup(createPopupContent(vet), { maxWidth: 300 });
+
+                // Add click listener to intercept IF in select mode
                 marker.on('click', (e) => {
-                    // Check if Shift Key is held OR if Select Mode toggle is ON
-                    if (e.originalEvent.shiftKey || isSelectionMode) {
-                        toggleVeteranSelection(vet.id, e.target);
-                    } else {
-                        marker.openPopup();
+                    // If Shift Key or Select Mode toggle is active
+                    if (isSelectionMode || e.originalEvent.shiftKey) {
+                        // Close the popup that just tried to open
+                        marker.closePopup();
+                        // Toggle selection
+                        toggleVeteranSelection(vet.id);
                     }
+                    // If regular click, do nothing here; the bound popup will open naturally
                 });
 
-                marker.bindPopup(createPopupContent(vet), { maxWidth: 300 });
                 marker.addTo(markersLayer);
                 markers.push({marker, vet});
             });
-            
-            if (markers.length > 0) {
-                // Optional: Only fit bounds on initial load to avoid jumping around when clicking
-                // const group = L.featureGroup(markers.map(m => m.marker));
-                // map.fitBounds(group.getBounds().pad(0.1));
-            }
         }
 
         function filterVeterans(shouldUpdateMap = true) {
@@ -443,7 +437,6 @@
             const timeFilter = document.getElementById('timeFilter').value;
             
             let filtered = allVeterans.filter(vet => {
-                // Only show mapped veterans in the map
                 if (!parseGPS(vet)) return false;
 
                 if (searchTerm) {
@@ -479,7 +472,7 @@
             });
             
             if (shouldUpdateMap) updateMap(filtered);
-            else updateMap(filtered); // Reuse for selection refresh
+            else updateMap(filtered);
         }
 
         function loadVeterans() {
@@ -515,7 +508,6 @@
                         };
                     }).filter(v => v !== null);
                     
-                    // Logic to separate Mapped vs Unmapped
                     let mappedCount = 0;
                     unmappedVeterans = [];
 
@@ -527,11 +519,9 @@
                         }
                     });
 
-                    // Update New Stats Layout
                     document.getElementById('totalCount').textContent = allVeterans.length;
                     document.getElementById('mappedCount').textContent = mappedCount;
 
-                    // Era Filter
                     const uniqueEras = [...new Set(allVeterans.map(v => v.era).filter(Boolean))];
                     const eraSelect = document.getElementById('eraFilter');
                     eraSelect.innerHTML = '<option value="all">All Service Eras</option>';
@@ -556,7 +546,6 @@
         document.getElementById('ageFilter').addEventListener('change', () => filterVeterans(true));
         document.getElementById('timeFilter').addEventListener('change', () => filterVeterans(true));
 
-        // Click outside modal to close
         window.onclick = function(event) {
             const modal = document.getElementById('unmappedModal');
             if (event.target == modal) {
