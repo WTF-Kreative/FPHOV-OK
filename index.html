@@ -40,7 +40,7 @@
         .nav-button { background: #1e40af; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500; }
         .nav-button:hover { background: #1e3a8a; }
 
-        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; padding-bottom: 100px; }
+        .container { max-width: 98%; margin: 0 auto; padding: 1.5rem; padding-bottom: 100px; }
 
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
         .stat-card { background: rgba(31, 41, 55, 0.95); border: 1px solid #374151; padding: 1rem; border-radius: 0.5rem; }
@@ -409,16 +409,12 @@
             sidebarList.innerHTML = '';
             
             if (count > 0) {
-                // Show FAB
                 fab.style.display = 'block';
-
-                // On Desktop: Auto-open sidebar, Hide FAB
                 if (window.innerWidth > 768) {
                     sidebar.classList.add('active');
                     fab.style.display = 'none';
                 }
                 
-                // Populate List
                 const selectedData = allVeterans.filter(v => selectedVeterans.has(v.id));
                 selectedData.forEach(vet => {
                     const div = document.createElement('div');
@@ -570,10 +566,15 @@
                 if (!contactHtml) contactHtml = '-';
                 
                 row.innerHTML = `
-                    <td class="checkbox-col"><input type="checkbox" ${isChecked} onchange="toggleVeteranSelection(${vet.id})"></td>
+                    <td class="checkbox-col">
+                        <input type="checkbox" ${isChecked} onchange="toggleVeteranSelection(${vet.id})">
+                    </td>
                     <td>${vet.dateReceived}</td>
                     <td style="font-weight: 600;">${vet.name}</td>
-                    <td class="address-cell"><div>${vet.address}</div><div class="address-line2">${vet.city}, OK ${vet.zip}</div></td>
+                    <td class="address-cell">
+                        <div>${vet.address}</div>
+                        <div class="address-line2">${vet.city}, OK ${vet.zip}</div>
+                    </td>
                     <td>${contactHtml}</td>
                     <td style="font-size: 0.875rem;">${vet.email}</td>
                     <td>${vet.age}</td>
@@ -618,7 +619,6 @@
                             branch: row['Branch of Service'] || '', era: row['DATES OR ERA OF SERVICE'] || '',
                             age: row['AGE'] || '',
                             address: row['Address'] || '', city: row['City'] || '', zip: row['ZIP'] || '',
-                            lat: row['Lat'] || '', lng: row['Long'] || '',
                             contact1Name: row['CONTACT #1 NAME (IF DIFFERENT)'] || '', contact1: row['CONTACT #1'] || '',
                             contact2Name: row['CONTACT #2 NAME (IF DIFFERENT)'] || '', contact2: row['CONTACT #2'] || '',
                             email: row['EMAIL'] || '',
