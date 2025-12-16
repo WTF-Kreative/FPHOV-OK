@@ -7,51 +7,26 @@
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        /* --- Background & Body Styles --- */
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             background-color: #111827; 
-            /* Fixed Background Image */
             background-image: url('bandit-background.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            color: #f3f4f6; 
-            overflow-x: hidden; 
-            position: relative;
-            min-height: 100vh;
+            background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat;
+            color: #f3f4f6; overflow-x: hidden; position: relative; min-height: 100vh;
         }
-
-        /* Dark Overlay */
         body::before {
-            content: "";
-            position: fixed;
-            top: 0; 
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(17, 24, 39, 0.85); /* Dark Blue-Gray Overlay */
-            z-index: -1;
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(17, 24, 39, 0.85); z-index: -1;
         }
-
         body.light-mode { color: #111827; }
-        
-        /* Light Mode Overlay */
-        body.light-mode::before {
-            background-color: rgba(243, 244, 246, 0.85);
-        }
+        body.light-mode::before { background-color: rgba(243, 244, 246, 0.85); }
 
-        /* --- Header Styles --- */
         .header { background: linear-gradient(to right, #991b1b, #ffffff, #1e3a8a); padding: 2px; }
         .header-content { background: #1f2937; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
         body.light-mode .header-content { background: white; }
@@ -60,22 +35,15 @@
         h1 { font-size: 1.875rem; font-weight: bold; }
         .subtitle { color: #9ca3af; font-size: 0.875rem; }
         body.light-mode .subtitle { color: #6b7280; }
-        
-        /* --- Controls & Nav --- */
+
         .controls { display: flex; gap: 1rem; align-items: center; }
         .mode-toggle { background: #374151; border: 1px solid #4b5563; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; color: #f3f4f6; }
         body.light-mode .mode-toggle { background: white; border-color: #d1d5db; color: #111827; }
         .nav-button { background: #1e40af; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500; }
         .nav-button:hover { background: #1e3a8a; }
 
-        /* --- Layout --- */
-        .container { 
-            max-width: 1400px; margin: 0 auto; padding: 1.5rem; 
-            transition: margin-right 0.3s ease; 
-        }
-        
-        /* --- Stats --- */
-        /* Added slight transparency to match list view */
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; transition: margin-right 0.3s ease; }
+
         .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
         .stat-card { background: rgba(31, 41, 55, 0.95); border: 1px solid #374151; padding: 1rem; border-radius: 0.5rem; }
         body.light-mode .stat-card { background: rgba(255, 255, 255, 0.95); border-color: #e5e7eb; }
@@ -84,8 +52,6 @@
         .stat-value { font-size: 1.5rem; font-weight: bold; margin-top: 0.5rem; }
         .stat-link { font-size: 0.875rem; color: #3b82f6; cursor: pointer; text-decoration: underline; margin-top: 0.5rem; display: block; }
 
-        /* --- Filters Grid --- */
-        /* Added slight transparency */
         .filters { background: rgba(31, 41, 55, 0.95); border: 1px solid #374151; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
         body.light-mode .filters { background: rgba(255, 255, 255, 0.95); border-color: #e5e7eb; }
         .search-box { width: 100%; padding: 0.75rem; border: 1px solid #374151; border-radius: 0.5rem; background: #374151; color: #f3f4f6; margin-bottom: 1rem; font-size: 1rem; }
@@ -95,16 +61,12 @@
         .filter-label { font-size: 0.875rem; font-weight: 600; color: #9ca3af; display: block; margin-bottom: 0.25rem; }
         body.light-mode .filter-label { color: #6b7280; }
 
-        /* --- Custom Multi-Select Dropdown Styles --- */
         .custom-dropdown { position: relative; width: 100%; }
-        
         .dropdown-btn {
             background: #374151; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #4b5563;
-            color: #f3f4f6; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
-            user-select: none;
+            color: #f3f4f6; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;
         }
         body.light-mode .dropdown-btn { background: white; border-color: #d1d5db; color: #111827; }
-        
         .dropdown-content {
             display: none; position: absolute; top: 105%; left: 0; right: 0;
             background: #374151; border: 1px solid #4b5563; z-index: 2000;
@@ -112,9 +74,7 @@
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
         body.light-mode .dropdown-content { background: white; border-color: #d1d5db; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        
         .dropdown-content.show { display: block; }
-        
         .dropdown-item {
             padding: 0.75rem; display: flex; gap: 0.75rem; align-items: center; cursor: pointer;
             border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -122,33 +82,36 @@
         body.light-mode .dropdown-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
         .dropdown-item:hover { background: rgba(255,255,255,0.1); }
         body.light-mode .dropdown-item:hover { background: rgba(0,0,0,0.05); }
-        .dropdown-item:last-child { border-bottom: none; }
-        
         .dropdown-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
 
-        /* --- Map --- */
         #map { height: 600px; border-radius: 0.5rem; border: 2px solid #374151; z-index: 1; }
         body.light-mode #map { border-color: #d1d5db; }
         .leaflet-popup-content-wrapper { background: #1f2937; color: #f3f4f6; }
         body.light-mode .leaflet-popup-content-wrapper { background: white; color: #111827; }
         
-        /* --- Badges --- */
         .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem; }
         .badge-branch { background: #dbeafe; color: #1e40af; }
         .badge-surprise { background: #fef3c7; color: #92400e; }
 
-        /* --- Sidebar --- */
         .sidebar {
-            position: fixed; top: 0; right: -350px; width: 350px; height: 100vh;
-            background: rgba(31, 41, 55, 0.95); border-left: 1px solid #374151;
+            position: fixed; top: 0; right: -400px; width: 350px; height: 100vh;
+            background: rgba(31, 41, 55, 0.98); border-left: 1px solid #374151;
             z-index: 1500; transition: right 0.3s ease;
             display: flex; flex-direction: column;
             box-shadow: -5px 0 15px rgba(0,0,0,0.5);
         }
-        body.light-mode .sidebar { background: rgba(255, 255, 255, 0.95); border-color: #e5e7eb; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        body.light-mode .sidebar { background: rgba(255, 255, 255, 0.98); border-color: #e5e7eb; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         .sidebar.active { right: 0; }
-        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #374151; background: transparent; }
+        
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; right: -100%; }
+            .sidebar.active { right: 0; }
+        }
+
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
         body.light-mode .sidebar-header { border-color: #e5e7eb; }
+        .sidebar-close { cursor: pointer; font-size: 1.5rem; font-weight: bold; }
+        
         .sidebar-content { flex: 1; overflow-y: auto; padding: 1rem; }
         .selected-item { 
             background: #374151; padding: 0.75rem; margin-bottom: 0.5rem; 
@@ -156,13 +119,12 @@
         }
         body.light-mode .selected-item { background: #f3f4f6; border: 1px solid #e5e7eb; }
         .remove-btn { color: #dc2626; cursor: pointer; padding: 0 0.5rem; font-weight: bold; font-size: 1.2rem; }
-        .sidebar-footer { padding: 1.5rem; border-top: 1px solid #374151; background: transparent; }
+        .sidebar-footer { padding: 1.5rem; border-top: 1px solid #374151; }
         body.light-mode .sidebar-footer { border-color: #e5e7eb; }
         .btn-action { width: 100%; padding: 0.75rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; margin-bottom: 0.5rem; }
         .btn-export { background: #16a34a; color: white; }
         .btn-clear { background: #dc2626; color: white; }
 
-        /* --- Floating Toggle --- */
         .floating-controls {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1400;
@@ -174,7 +136,17 @@
         }
         .btn-select-mode.active { background: #d97706; border-color: #f59e0b; }
 
-        /* --- Unmapped Modal --- */
+        .btn-review-fab {
+            position: fixed; bottom: 20px; right: 20px;
+            background: #2563eb; color: white;
+            padding: 1rem 1.5rem; border-radius: 2rem;
+            font-weight: bold; border: none; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1400; cursor: pointer;
+            display: none;
+        }
+        .btn-review-fab:hover { background: #1d4ed8; }
+
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); z-index: 2000; align-items: center; justify-content: center;
@@ -191,13 +163,13 @@
         .unmapped-item { padding: 0.75rem; border-bottom: 1px solid #374151; }
         .unmapped-item:last-child { border-bottom: none; }
 
-        /* --- Markers --- */
         .marker-default { background: #dc2626; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         .marker-selected { background: #fbbf24; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px #fbbf24; transform: scale(1.1); }
 
         .loading { text-align: center; padding: 3rem; }
         .flag-svg { width: 64px; height: 64px; margin: 0 auto 1rem; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .no-results { text-align: center; padding: 3rem; color: #9ca3af; display: none; }
     </style>
 </head>
 <body>
@@ -247,11 +219,9 @@
                             <span id="btn-text-year">All Years</span>
                             <span>▼</span>
                         </div>
-                        <div class="dropdown-content" id="list-year">
-                            </div>
+                        <div class="dropdown-content" id="list-year"></div>
                     </div>
                 </div>
-
                 <div>
                     <label class="filter-label">Service Era</label>
                     <div class="custom-dropdown" id="dd-era">
@@ -259,11 +229,9 @@
                             <span id="btn-text-era">All Service Eras</span>
                             <span>▼</span>
                         </div>
-                        <div class="dropdown-content" id="list-era">
-                            </div>
+                        <div class="dropdown-content" id="list-era"></div>
                     </div>
                 </div>
-
                 <div>
                     <label class="filter-label">Age Group</label>
                     <div class="custom-dropdown" id="dd-age">
@@ -271,8 +239,7 @@
                             <span id="btn-text-age">All Ages</span>
                             <span>▼</span>
                         </div>
-                        <div class="dropdown-content" id="list-age">
-                            </div>
+                        <div class="dropdown-content" id="list-age"></div>
                     </div>
                 </div>
             </div>
@@ -290,13 +257,19 @@
         <button id="btnSelectMode" class="btn-select-mode" onclick="toggleSelectionMode()">Select Mode: OFF</button>
     </div>
 
+    <button id="btnReview" class="btn-review-fab" onclick="openSidebar()">
+        Review (<span id="fabCount">0</span>)
+    </button>
+
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
-            <h3>Selected Veterans (<span id="sidebarCount">0</span>)</h3>
-            <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 5px;">Review list before export</p>
-        </div>
-        <div class="sidebar-content" id="sidebarList">
+            <div>
+                <h3>Selected Veterans (<span id="sidebarCount">0</span>)</h3>
+                <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 5px;">Review list before export</p>
             </div>
+            <span class="sidebar-close" onclick="closeSidebar()">&times;</span>
+        </div>
+        <div class="sidebar-content" id="sidebarList"></div>
         <div class="sidebar-footer">
             <button class="btn-action btn-export" onclick="exportSelected()">Export Full PDF</button>
             <button class="btn-action btn-clear" onclick="clearSelection()">Clear Selection</button>
@@ -309,8 +282,7 @@
                 <h3>Unmapped Veterans</h3>
                 <span class="modal-close" onclick="closeUnmappedModal()">&times;</span>
             </div>
-            <div class="modal-body" id="unmappedListBody">
-                </div>
+            <div class="modal-body" id="unmappedListBody"></div>
         </div>
     </div>
 
@@ -323,17 +295,9 @@
         let markersLayer;
         let unmappedVeterans = [];
         
-        // Filter States
         let uniqueYears = [];
         let uniqueEras = [];
-        
-        let activeFilters = {
-            years: new Set(),
-            eras: new Set(),
-            ages: new Set()
-        };
-        
-        // Selection State
+        let activeFilters = { years: new Set(), eras: new Set(), ages: new Set() };
         let selectedVeterans = new Set();
         let isSelectionMode = false;
 
@@ -350,26 +314,19 @@
             }
         }
 
-        // --- Custom Dropdown Logic ---
         function toggleDropdown(type) {
             const allDropdowns = document.querySelectorAll('.dropdown-content');
             const current = document.getElementById(`list-${type}`);
-            allDropdowns.forEach(dd => {
-                if (dd !== current) dd.classList.remove('show');
-            });
+            allDropdowns.forEach(dd => { if (dd !== current) dd.classList.remove('show'); });
             current.classList.toggle('show');
         }
 
         window.onclick = function(event) {
-            // Close unmapped modal
             const modal = document.getElementById('unmappedModal');
             if (event.target == modal) modal.style.display = "none";
-
-            // Close dropdowns logic
             if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *')) {
                 if (!event.target.closest('.dropdown-content')) {
-                    const dropdowns = document.querySelectorAll('.dropdown-content');
-                    dropdowns.forEach(dd => dd.classList.remove('show'));
+                    document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
                 }
             }
         }
@@ -377,10 +334,7 @@
         function createCheckbox(type, value, label) {
             const div = document.createElement('div');
             div.className = 'dropdown-item';
-            div.innerHTML = `
-                <input type="checkbox" onchange="toggleFilter('${type}', '${value}', this)">
-                <span>${label}</span>
-            `;
+            div.innerHTML = `<input type="checkbox" onchange="toggleFilter('${type}', '${value}', this)"><span>${label}</span>`;
             div.onclick = (e) => {
                 if(e.target.tagName !== 'INPUT') {
                     const cb = div.querySelector('input');
@@ -392,31 +346,21 @@
         }
 
         function populateDropdowns() {
-            // Years
             const yearList = document.getElementById('list-year');
             yearList.innerHTML = '';
             uniqueYears.sort((a,b) => a - b);
-            uniqueYears.forEach(year => {
-                yearList.appendChild(createCheckbox('year', year, year));
-            });
+            uniqueYears.forEach(year => yearList.appendChild(createCheckbox('year', year, year)));
 
-            // Eras
             const eraList = document.getElementById('list-era');
             eraList.innerHTML = '';
             uniqueEras.sort();
-            uniqueEras.forEach(era => {
-                eraList.appendChild(createCheckbox('era', era, era));
-            });
+            uniqueEras.forEach(era => eraList.appendChild(createCheckbox('era', era, era)));
 
-            // Ages
             const ageList = document.getElementById('list-age');
             ageList.innerHTML = '';
             const ageBuckets = ['90+', '80-89', '70-79', '60-69', '50-59', '40-49', '20-39'];
             const ageLabels = ['90+ Years', '80-89 Years', '70-79 Years', '60-69 Years', '50-59 Years', '40-49 Years', '20-39 Years'];
-            
-            ageBuckets.forEach((bucket, idx) => {
-                ageList.appendChild(createCheckbox('age', bucket, ageLabels[idx]));
-            });
+            ageBuckets.forEach((bucket, idx) => ageList.appendChild(createCheckbox('age', bucket, ageLabels[idx])));
         }
 
         function toggleFilter(type, value, checkbox) {
@@ -424,36 +368,23 @@
             let btnTextId;
             let defaultText;
 
-            // FIX: Ensure Years are Numbers for correct filtering
-            if (type === 'year') { 
-                filterSet = activeFilters.years; 
-                btnTextId = 'btn-text-year'; 
-                defaultText = 'All Years'; 
-                value = parseInt(value); // FIX: Ensure integer
-            }
+            if (type === 'year') { filterSet = activeFilters.years; btnTextId = 'btn-text-year'; defaultText = 'All Years'; value = parseInt(value); }
             if (type === 'era') { filterSet = activeFilters.eras; btnTextId = 'btn-text-era'; defaultText = 'All Service Eras'; }
             if (type === 'age') { filterSet = activeFilters.ages; btnTextId = 'btn-text-age'; defaultText = 'All Ages'; }
 
-            if (checkbox.checked) {
-                filterSet.add(value);
-            } else {
-                filterSet.delete(value);
-            }
+            if (checkbox.checked) filterSet.add(value);
+            else filterSet.delete(value);
 
             const btnText = document.getElementById(btnTextId);
-            if (filterSet.size === 0) {
-                btnText.textContent = defaultText;
-            } else if (filterSet.size === 1) {
+            if (filterSet.size === 0) btnText.textContent = defaultText;
+            else if (filterSet.size === 1) {
                 btnText.textContent = `${filterSet.size} Selected`;
                 if(type === 'year' || type === 'era') btnText.textContent = Array.from(filterSet)[0];
-            } else {
-                btnText.textContent = `${filterSet.size} Selected`;
-            }
+            } else btnText.textContent = `${filterSet.size} Selected`;
 
             filterVeterans();
         }
 
-        // --- Selection Logic ---
         function toggleSelectionMode() {
             isSelectionMode = !isSelectionMode;
             const btn = document.getElementById('btnSelectMode');
@@ -462,7 +393,8 @@
             if (isSelectionMode) {
                 btn.classList.add('active');
                 btn.textContent = "Select Mode: ON";
-                if (selectedVeterans.size > 0) sidebar.classList.add('active');
+                // Only auto-open sidebar if deskop and items selected
+                if (selectedVeterans.size > 0 && window.innerWidth > 768) sidebar.classList.add('active');
             } else {
                 btn.classList.remove('active');
                 btn.textContent = "Select Mode: OFF";
@@ -471,31 +403,43 @@
         }
 
         function toggleVeteranSelection(vetId) {
-            if (selectedVeterans.has(vetId)) {
-                selectedVeterans.delete(vetId);
-            } else {
-                selectedVeterans.add(vetId);
-            }
+            if (selectedVeterans.has(vetId)) selectedVeterans.delete(vetId);
+            else selectedVeterans.add(vetId);
+            renderTable(); 
             updateSelectionUI();
-            filterVeterans(false); 
         }
 
         function clearSelection() {
             selectedVeterans.clear();
+            renderTable();
             updateSelectionUI();
-            filterVeterans(false);
+        }
+
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('active');
         }
 
         function updateSelectionUI() {
             const count = selectedVeterans.size;
             document.getElementById('sidebarCount').textContent = count;
+            document.getElementById('fabCount').textContent = count;
+            
             const sidebar = document.getElementById('sidebar');
             const sidebarList = document.getElementById('sidebarList');
+            const fab = document.getElementById('btnReview');
 
             sidebarList.innerHTML = '';
             
             if (count > 0) {
-                if (isSelectionMode) sidebar.classList.add('active');
+                fab.style.display = 'block';
+                if (window.innerWidth > 768) {
+                    sidebar.classList.add('active');
+                    fab.style.display = 'none';
+                }
                 
                 const selectedData = allVeterans.filter(v => selectedVeterans.has(v.id));
                 selectedData.forEach(vet => {
@@ -512,6 +456,7 @@
                 });
             } else {
                 sidebar.classList.remove('active');
+                fab.style.display = 'none';
             }
         }
 
@@ -536,14 +481,8 @@
                 const serviceInfo = `${v.branch}\n${v.era}\nAge: ${v.age}`;
 
                 return [
-                    v.dateReceived,
-                    v.name,
-                    fullAddress,
-                    contactInfo,
-                    serviceInfo,
-                    v.nominatedBy || '-',
-                    v.surprise || '-',
-                    v.notes || '-'
+                    v.dateReceived, v.name, fullAddress, contactInfo, serviceInfo,
+                    v.nominatedBy || '-', v.surprise || '-', v.notes || '-'
                 ];
             });
 
@@ -553,14 +492,8 @@
                 startY: 25,
                 styles: { fontSize: 8, cellPadding: 2, overflow: 'linebreak', valign: 'top', lineColor: [200, 200, 200], lineWidth: 0.1 },
                 columnStyles: {
-                    0: { cellWidth: 20 },
-                    1: { cellWidth: 30, fontStyle: 'bold' },
-                    2: { cellWidth: 40 },
-                    3: { cellWidth: 50 },
-                    4: { cellWidth: 25 },
-                    5: { cellWidth: 25 },
-                    6: { cellWidth: 15 },
-                    7: { cellWidth: 'auto' }
+                    0: { cellWidth: 20 }, 1: { cellWidth: 30, fontStyle: 'bold' }, 2: { cellWidth: 40 },
+                    3: { cellWidth: 50 }, 4: { cellWidth: 25 }, 5: { cellWidth: 25 }, 6: { cellWidth: 15 }, 7: { cellWidth: 'auto' }
                 },
                 theme: 'grid',
                 headStyles: { fillColor: [30, 64, 175], textColor: 255 } 
@@ -569,7 +502,6 @@
             doc.save('veteran_install_list.pdf');
         }
 
-        // --- Unmapped Modal Logic ---
         function openUnmappedModal() {
             const body = document.getElementById('unmappedListBody');
             body.innerHTML = '';
@@ -593,7 +525,6 @@
 
         function closeUnmappedModal() { document.getElementById('unmappedModal').style.display = 'none'; }
 
-        // --- Map Logic ---
         function initMap() {
             map = L.map('map').setView([35.5, -97.5], 7);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -663,21 +594,15 @@
                     if (!searchStr.includes(searchTerm)) return false;
                 }
                 
-                // Year Filter
                 if (activeFilters.years.size > 0) {
                     if (!vet.nominationYear || !activeFilters.years.has(vet.nominationYear)) return false;
                 }
-
-                // Era Filter
                 if (activeFilters.eras.size > 0) {
                     if (!vet.era || !activeFilters.eras.has(vet.era)) return false;
                 }
-                
-                // Age Filter
                 if (activeFilters.ages.size > 0) {
                     const age = parseInt(vet.age);
                     if (isNaN(age)) return false;
-                    
                     let matched = false;
                     if (activeFilters.ages.has('90+') && age >= 90) matched = true;
                     if (activeFilters.ages.has('80-89') && age >= 80 && age < 90) matched = true;
@@ -686,7 +611,6 @@
                     if (activeFilters.ages.has('50-59') && age >= 50 && age < 60) matched = true;
                     if (activeFilters.ages.has('40-49') && age >= 40 && age < 50) matched = true;
                     if (activeFilters.ages.has('20-39') && age >= 20 && age < 40) matched = true;
-                    
                     if (!matched) return false;
                 }
                 return true;
@@ -754,7 +678,6 @@
         }
 
         document.getElementById('search').addEventListener('input', () => filterVeterans(true));
-        
         loadVeterans();
     </script>
 </body>
