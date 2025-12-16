@@ -4,276 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FPHOV - Veteran Map</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #111827; color: #f3f4f6; }
+        body.light-mode { background: #f3f4f6; color: #111827; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #111827;
-            color: #f3f4f6;
-        }
+        /* --- Header Styles --- */
+        .header { background: linear-gradient(to right, #991b1b, #ffffff, #1e3a8a); padding: 2px; }
+        .header-content { background: #1f2937; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        body.light-mode .header-content { background: white; }
+        .header-title { display: flex; align-items: center; gap: 1rem; }
+        .flag-icon { width: 48px; height: 48px; color: #dc2626; }
+        h1 { font-size: 1.875rem; font-weight: bold; }
+        .subtitle { color: #9ca3af; font-size: 0.875rem; }
+        body.light-mode .subtitle { color: #6b7280; }
+        
+        /* --- Controls & Nav --- */
+        .controls { display: flex; gap: 1rem; align-items: center; }
+        .mode-toggle { background: #374151; border: 1px solid #4b5563; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; color: #f3f4f6; }
+        body.light-mode .mode-toggle { background: white; border-color: #d1d5db; color: #111827; }
+        .nav-button { background: #1e40af; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500; }
+        .nav-button:hover { background: #1e3a8a; }
 
-        body.light-mode {
-            background: #f3f4f6;
-            color: #111827;
-        }
+        /* --- Layout --- */
+        .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem; padding-bottom: 100px; /* Space for fixed footer */ }
+        
+        /* --- Stats --- */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: #1f2937; border: 1px solid #374151; padding: 1rem; border-radius: 0.5rem; }
+        body.light-mode .stat-card { background: white; border-color: #e5e7eb; }
+        .stat-label { color: #9ca3af; font-size: 0.875rem; }
+        body.light-mode .stat-label { color: #6b7280; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; margin-top: 0.5rem; }
+        .stat-link { font-size: 0.875rem; color: #3b82f6; cursor: pointer; text-decoration: underline; margin-top: 0.5rem; display: block; }
 
-        .header {
-            background: linear-gradient(to right, #991b1b, #ffffff, #1e3a8a);
-            padding: 2px;
-        }
+        /* --- Filters --- */
+        .filters { background: #1f2937; border: 1px solid #374151; padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
+        body.light-mode .filters { background: white; border-color: #e5e7eb; }
+        .search-box { width: 100%; padding: 0.75rem; border: 1px solid #374151; border-radius: 0.5rem; background: #374151; color: #f3f4f6; margin-bottom: 1rem; font-size: 1rem; }
+        body.light-mode .search-box { background: white; border-color: #d1d5db; color: #111827; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+        select { width: 100%; padding: 0.75rem; border: 1px solid #374151; border-radius: 0.5rem; background: #374151; color: #f3f4f6; font-size: 0.875rem; }
+        body.light-mode select { background: white; border-color: #d1d5db; color: #111827; }
 
-        .header-content {
-            background: #1f2937;
-            padding: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+        /* --- Map --- */
+        #map { height: 600px; border-radius: 0.5rem; border: 2px solid #374151; }
+        body.light-mode #map { border-color: #d1d5db; }
+        .leaflet-popup-content-wrapper { background: #1f2937; color: #f3f4f6; }
+        body.light-mode .leaflet-popup-content-wrapper { background: white; color: #111827; }
+        
+        /* --- Badges --- */
+        .badge { display: inline-block; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-top: 0.25rem; }
+        .badge-branch { background: #dbeafe; color: #1e40af; }
+        .badge-surprise { background: #fef3c7; color: #92400e; }
 
-        body.light-mode .header-content {
-            background: white;
+        /* --- Selection Floating Bar --- */
+        .selection-bar {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: #1f2937; border: 1px solid #374151; padding: 1rem;
+            border-radius: 1rem; display: flex; gap: 1rem; align-items: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
         }
+        body.light-mode .selection-bar { background: white; border-color: #e5e7eb; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .btn-action { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; }
+        .btn-select-mode { background: #374151; color: white; }
+        .btn-select-mode.active { background: #d97706; color: white; }
+        .btn-export { background: #16a34a; color: white; display: none; }
+        .btn-clear { background: #dc2626; color: white; display: none; }
 
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        /* --- Unmapped Modal --- */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); z-index: 2000; align-items: center; justify-content: center;
         }
-
-        .flag-icon {
-            width: 48px;
-            height: 48px;
-            color: #dc2626;
-        }
-
-        h1 {
-            font-size: 1.875rem;
-            font-weight: bold;
-        }
-
-        .subtitle {
-            color: #9ca3af;
-            font-size: 0.875rem;
-        }
-
-        body.light-mode .subtitle {
-            color: #6b7280;
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .mode-toggle {
-            background: #374151;
-            border: 1px solid #4b5563;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            color: #f3f4f6;
-        }
-
-        body.light-mode .mode-toggle {
-            background: white;
-            border-color: #d1d5db;
-            color: #111827;
-        }
-
-        .nav-button {
-            background: #1e40af;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .nav-button:hover {
-            background: #1e3a8a;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .stat-card {
-            background: #1f2937;
+        .modal-content {
+            background: #1f2937; width: 90%; max-width: 800px; max-height: 80vh;
+            border-radius: 0.5rem; display: flex; flex-direction: column;
             border: 1px solid #374151;
-            padding: 1rem;
-            border-radius: 0.5rem;
         }
+        body.light-mode .modal-content { background: white; color: #111827; }
+        .modal-header { padding: 1.5rem; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { padding: 1.5rem; overflow-y: auto; }
+        .modal-close { cursor: pointer; font-size: 1.5rem; }
+        .unmapped-item { padding: 0.75rem; border-bottom: 1px solid #374151; }
+        .unmapped-item:last-child { border-bottom: none; }
 
-        body.light-mode .stat-card {
-            background: white;
-            border-color: #e5e7eb;
-        }
+        /* --- Markers --- */
+        .marker-default { background: #dc2626; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .marker-selected { background: #fbbf24; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px #fbbf24; transform: scale(1.1); }
 
-        .stat-label {
-            color: #9ca3af;
-            font-size: 0.875rem;
-        }
-
-        body.light-mode .stat-label {
-            color: #6b7280;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-top: 0.5rem;
-        }
-
-        .filters {
-            background: #1f2937;
-            border: 1px solid #374151;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        body.light-mode .filters {
-            background: white;
-            border-color: #e5e7eb;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #374151;
-            border-radius: 0.5rem;
-            background: #374151;
-            color: #f3f4f6;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
-        body.light-mode .search-box {
-            background: white;
-            border-color: #d1d5db;
-            color: #111827;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #374151;
-            border-radius: 0.5rem;
-            background: #374151;
-            color: #f3f4f6;
-            font-size: 0.875rem;
-        }
-
-        body.light-mode select {
-            background: white;
-            border-color: #d1d5db;
-            color: #111827;
-        }
-
-        #map {
-            height: 600px;
-            border-radius: 0.5rem;
-            border: 2px solid #374151;
-        }
-
-        body.light-mode #map {
-            border-color: #d1d5db;
-        }
-
-        .leaflet-popup-content-wrapper {
-            background: #1f2937;
-            color: #f3f4f6;
-        }
-
-        body.light-mode .leaflet-popup-content-wrapper {
-            background: white;
-            color: #111827;
-        }
-
-        .popup-content {
-            padding: 0.5rem;
-        }
-
-        .popup-name {
-            font-size: 1.125rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #dc2626;
-        }
-
-        .popup-field {
-            margin: 0.25rem 0;
-            font-size: 0.875rem;
-        }
-
-        .popup-label {
-            font-weight: 600;
-            color: #9ca3af;
-        }
-
-        body.light-mode .popup-label {
-            color: #6b7280;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-
-        .badge-branch {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .badge-surprise {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 3rem;
-        }
-
-        .flag-svg {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 1rem;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+        .loading { text-align: center; padding: 3rem; }
+        .flag-svg { width: 64px; height: 64px; margin: 0 auto 1rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -283,7 +115,7 @@
                 <img src="fphov-logo.png" alt="FPHOV Logo" class="flag-icon" style="object-fit: contain;">
                 <div>
                     <h1>Flag Poles Honoring Our Veterans</h1>
-                    <p class="subtitle">Interactive Map - Installation Locations</p>
+                    <p class="subtitle">Interactive Map & Planning Tool</p>
                 </div>
             </div>
             <div class="controls">
@@ -303,15 +135,15 @@
     <div class="container">
         <div class="stats">
             <div class="stat-card">
-                <div class="stat-label">Veterans on Map</div>
-                <div class="stat-value" style="color: #2563eb;" id="mapCount">-</div>
+                <div class="stat-label">Mapping Status</div>
+                <div class="stat-value" style="color: #2563eb;">
+                    <span id="mappedCount">0</span> of <span id="totalCount">0</span>
+                    <span style="font-size: 1rem; color: #9ca3af;">Mapped</span>
+                </div>
+                <a class="stat-link" onclick="openUnmappedModal()">View Unmapped Veterans</a>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Total Waiting</div>
-                <div class="stat-value" style="color: #dc2626;" id="totalCount">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Completed</div>
+                <div class="stat-label">Installations Completed</div>
                 <div class="stat-value" style="color: #16a34a;" id="completedCount">0</div>
             </div>
         </div>
@@ -319,9 +151,7 @@
         <div class="filters">
             <input type="text" id="search" class="search-box" placeholder="Search by name, address, city, notes...">
             <div class="filter-grid">
-                <select id="eraFilter">
-                    <option value="all">All Service Eras</option>
-                </select>
+                <select id="eraFilter"><option value="all">All Service Eras</option></select>
                 <select id="ageFilter">
                     <option value="all">All Ages</option>
                     <option value="90+">90+ years</option>
@@ -348,6 +178,24 @@
         <div id="map" style="display: none;"></div>
     </div>
 
+    <div class="selection-bar">
+        <button id="btnSelectMode" class="btn-action btn-select-mode" onclick="toggleSelectionMode()">Tap to Select: OFF</button>
+        <div style="font-size: 0.875rem; color: #9ca3af;" id="selectionCount">0 Selected</div>
+        <button id="btnExport" class="btn-action btn-export" onclick="exportSelected()">Export PDF</button>
+        <button id="btnClear" class="btn-action btn-clear" onclick="clearSelection()">X</button>
+    </div>
+
+    <div id="unmappedModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Unmapped Veterans</h3>
+                <span class="modal-close" onclick="closeUnmappedModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="unmappedListBody">
+                </div>
+        </div>
+    </div>
+
     <script>
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSI7gRLdABZx7uGwBco1KH6_1MfXrOG8jHp3HZfr_3XFRF2z14dbj6WfR7tlu9gWE3t27938qZxT-a0/pub?output=csv';
         
@@ -355,12 +203,16 @@
         let markers = [];
         let allVeterans = [];
         let markersLayer;
+        let unmappedVeterans = [];
+        
+        // Selection State
+        let selectedVeterans = new Set();
+        let isSelectionMode = false;
 
         function toggleDarkMode() {
             document.body.classList.toggle('light-mode');
             const moonIcon = document.getElementById('moon-icon');
             const sunIcon = document.getElementById('sun-icon');
-            
             if (document.body.classList.contains('light-mode')) {
                 moonIcon.style.display = 'none';
                 sunIcon.style.display = 'block';
@@ -370,42 +222,159 @@
             }
         }
 
-        function initMap() {
-            // Center on Oklahoma
-            map = L.map('map').setView([35.5, -97.5], 7);
+        // --- Selection Logic ---
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            const btn = document.getElementById('btnSelectMode');
+            if (isSelectionMode) {
+                btn.classList.add('active');
+                btn.textContent = "Tap to Select: ON";
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = "Tap to Select: OFF";
+            }
+        }
+
+        function toggleVeteranSelection(vetId, markerIconDiv) {
+            if (selectedVeterans.has(vetId)) {
+                selectedVeterans.delete(vetId);
+            } else {
+                selectedVeterans.add(vetId);
+            }
+            updateSelectionUI();
             
+            // Just trigger a map refresh to update icon colors easily
+            filterVeterans(false); 
+        }
+
+        function clearSelection() {
+            selectedVeterans.clear();
+            updateSelectionUI();
+            filterVeterans(false);
+        }
+
+        function updateSelectionUI() {
+            const count = selectedVeterans.size;
+            document.getElementById('selectionCount').textContent = `${count} Selected`;
+            
+            const btnExport = document.getElementById('btnExport');
+            const btnClear = document.getElementById('btnClear');
+            
+            if (count > 0) {
+                btnExport.style.display = 'block';
+                btnClear.style.display = 'block';
+            } else {
+                btnExport.style.display = 'none';
+                btnClear.style.display = 'none';
+            }
+        }
+
+        function exportSelected() {
+            if (selectedVeterans.size === 0) return;
+
+            // Initialize jsPDF
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('l', 'mm', 'a4'); // Landscape orientation for more columns
+
+            // Title
+            doc.setFontSize(18);
+            doc.text("FPHOV - Veteran Installation List", 14, 22);
+            doc.setFontSize(11);
+            doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
+
+            // Prepare Data for AutoTable
+            const selectedData = allVeterans.filter(v => selectedVeterans.has(v.id));
+            
+            const tableBody = selectedData.map(v => {
+                // Formatting specific fields
+                const fullAddress = `${v.address}\n${v.city}, OK ${v.zip}`;
+                const contactInfo = `${v.contact1Name || 'Primary'}: ${v.contact1}\n${v.contact2 ? (v.contact2Name || 'Secondary') + ': ' + v.contact2 : ''}`;
+                const serviceInfo = `${v.branch}\n${v.era}`;
+                
+                return [
+                    v.name,
+                    fullAddress,
+                    contactInfo,
+                    serviceInfo,
+                    v.surprise || '-',
+                    v.notes || '-'
+                ];
+            });
+
+            // Generate Table
+            doc.autoTable({
+                head: [['Name', 'Address', 'Contact Info', 'Service', 'Surprise?', 'Notes']],
+                body: tableBody,
+                startY: 35,
+                styles: { 
+                    fontSize: 10, 
+                    cellPadding: 3, 
+                    overflow: 'linebreak', // Ensure text wraps
+                    valign: 'top'
+                },
+                columnStyles: {
+                    0: { cellWidth: 35, fontStyle: 'bold' }, // Name
+                    1: { cellWidth: 50 }, // Address
+                    2: { cellWidth: 50 }, // Contact
+                    3: { cellWidth: 30 }, // Service
+                    4: { cellWidth: 20 }, // Surprise
+                    5: { cellWidth: 'auto' } // Notes (Takes remaining space)
+                },
+                theme: 'grid',
+                headStyles: { fillColor: [30, 64, 175] } // Blue header matching theme
+            });
+
+            // Save
+            doc.save('veteran_install_list.pdf');
+        }
+
+        // --- Unmapped Modal Logic ---
+        function openUnmappedModal() {
+            const body = document.getElementById('unmappedListBody');
+            body.innerHTML = '';
+
+            if (unmappedVeterans.length === 0) {
+                body.innerHTML = '<p>All veterans have been mapped!</p>';
+            } else {
+                unmappedVeterans.forEach(vet => {
+                    const div = document.createElement('div');
+                    div.className = 'unmapped-item';
+                    div.innerHTML = `
+                        <div style="font-weight: bold; color: #dc2626;">${vet.name}</div>
+                        <div style="font-size: 0.9rem;">${vet.address}, ${vet.city}</div>
+                        <div style="font-size: 0.8rem; color: #9ca3af;">${vet.email || 'No Email'} | ${vet.contact1 || 'No Phone'}</div>
+                        <div style="font-size: 0.8rem; margin-top: 4px;">Issue: Missing or Invalid GPS</div>
+                    `;
+                    body.appendChild(div);
+                });
+            }
+            document.getElementById('unmappedModal').style.display = 'flex';
+        }
+
+        function closeUnmappedModal() {
+            document.getElementById('unmappedModal').style.display = 'none';
+        }
+
+        // --- Map Logic ---
+
+        function initMap() {
+            map = L.map('map').setView([35.5, -97.5], 7);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
-
             markersLayer = L.layerGroup().addTo(map);
         }
 
         function parseGPS(vet) {
-            // Clean and parse the lat/lng values
             let lat = vet.lat;
             let lng = vet.lng;
-            
-            // Remove any extra whitespace
             if (typeof lat === 'string') lat = lat.trim();
             if (typeof lng === 'string') lng = lng.trim();
-            
-            // Convert to float
             lat = parseFloat(lat);
             lng = parseFloat(lng);
             
-            // Validate
-            if (isNaN(lat) || isNaN(lng)) {
-                console.log('Invalid GPS for:', vet.name, 'Lat:', vet.lat, 'Lng:', vet.lng);
-                return null;
-            }
-            
-            // Validate ranges (rough check for Oklahoma area)
-            if (lat < 33 || lat > 37 || lng > -94 || lng < -103) {
-                console.log('Out of range GPS for:', vet.name, 'Lat:', lat, 'Lng:', lng);
-                return null;
-            }
-            
+            if (isNaN(lat) || isNaN(lng)) return null;
+            if (lat < 25 || lat > 50 || lng > -65 || lng < -125) return null; // Rough USA bounds
             return [lat, lng];
         }
 
@@ -415,12 +384,9 @@
                     <div class="popup-name">${vet.name}</div>
                     <div class="popup-field"><span class="popup-label">Address:</span> ${vet.address}</div>
                     <div class="popup-field"><span class="popup-label">City:</span> ${vet.city}, OK ${vet.zip}</div>
-                    ${vet.contact1 ? `<div class="popup-field"><span class="popup-label">${vet.contact1Name || 'Contact 1'}:</span> ${vet.contact1}</div>` : ''}
-                    ${vet.contact2 ? `<div class="popup-field"><span class="popup-label">${vet.contact2Name || 'Contact 2'}:</span> ${vet.contact2}</div>` : ''}
+                    ${vet.contact1 ? `<div class="popup-field"><span class="popup-label">${vet.contact1Name || 'Contact 1'}:</span> <a href="tel:${vet.contact1}" style="color:#3b82f6">${vet.contact1}</a></div>` : ''}
                     ${vet.email ? `<div class="popup-field"><span class="popup-label">Email:</span> ${vet.email}</div>` : ''}
-                    <div class="popup-field"><span class="popup-label">Age:</span> ${vet.age}</div>
-                    <div class="popup-field"><span class="popup-label">Era:</span> ${vet.era}</div>
-                    <div class="popup-field"><span class="popup-label">Date Added:</span> ${vet.dateReceived}</div>
+                    <div class="popup-field"><span class="popup-label">Age:</span> ${vet.age} | ${vet.era}</div>
                     ${vet.branch ? `<div><span class="badge badge-branch">${vet.branch}</span></div>` : ''}
                     ${vet.surprise.toLowerCase() === 'y' || vet.surprise.toLowerCase() === 'yes' ? `<div><span class="badge badge-surprise">SURPRISE</span></div>` : ''}
                     ${vet.notes ? `<div class="popup-field" style="margin-top: 0.5rem;"><span class="popup-label">Notes:</span> ${vet.notes}</div>` : ''}
@@ -432,67 +398,63 @@
             markersLayer.clearLayers();
             markers = [];
             
-            let validCount = 0;
-            
-            console.log('Filtering', filteredVets.length, 'veterans for map display');
-            
             filteredVets.forEach(vet => {
                 const coords = parseGPS(vet);
                 if (!coords) return;
                 
-                validCount++;
-                console.log('Adding marker for:', vet.name, 'at', coords);
-                
+                const isSelected = selectedVeterans.has(vet.id);
+                const markerClass = isSelected ? 'marker-selected' : 'marker-default';
+
                 const marker = L.marker(coords, {
                     icon: L.divIcon({
                         className: 'custom-marker',
-                        html: `<div style="background: #dc2626; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>`,
+                        html: `<div class="${markerClass}"></div>`,
                         iconSize: [24, 24],
                         iconAnchor: [12, 12]
                     })
                 });
                 
-                marker.bindPopup(createPopupContent(vet), {
-                    maxWidth: 300
+                // Click Handler
+                marker.on('click', (e) => {
+                    // Check if Shift Key is held OR if Select Mode toggle is ON
+                    if (e.originalEvent.shiftKey || isSelectionMode) {
+                        toggleVeteranSelection(vet.id, e.target);
+                    } else {
+                        marker.openPopup();
+                    }
                 });
-                
+
+                marker.bindPopup(createPopupContent(vet), { maxWidth: 300 });
                 marker.addTo(markersLayer);
                 markers.push({marker, vet});
             });
             
-            console.log('Added', validCount, 'markers to map');
-            
-            document.getElementById('mapCount').textContent = validCount;
-            
-            if (validCount > 0 && markers.length > 0) {
-                const group = L.featureGroup(markers.map(m => m.marker));
-                map.fitBounds(group.getBounds().pad(0.1));
-            } else {
-                console.log('No valid markers to display');
+            if (markers.length > 0) {
+                // Optional: Only fit bounds on initial load to avoid jumping around when clicking
+                // const group = L.featureGroup(markers.map(m => m.marker));
+                // map.fitBounds(group.getBounds().pad(0.1));
             }
         }
 
-        function filterVeterans() {
+        function filterVeterans(shouldUpdateMap = true) {
             const searchTerm = document.getElementById('search').value.toLowerCase();
             const eraFilter = document.getElementById('eraFilter').value;
             const ageFilter = document.getElementById('ageFilter').value;
             const timeFilter = document.getElementById('timeFilter').value;
             
             let filtered = allVeterans.filter(vet => {
-                // Search filter
+                // Only show mapped veterans in the map
+                if (!parseGPS(vet)) return false;
+
                 if (searchTerm) {
                     const searchStr = `${vet.name} ${vet.address} ${vet.city} ${vet.notes}`.toLowerCase();
                     if (!searchStr.includes(searchTerm)) return false;
                 }
-                
-                // Era filter
                 if (eraFilter !== 'all' && vet.era !== eraFilter) return false;
                 
-                // Age filter
                 if (ageFilter !== 'all') {
                     const age = parseInt(vet.age);
                     if (isNaN(age)) return false;
-                    
                     switch(ageFilter) {
                         case '90+': if (age < 90) return false; break;
                         case '80-89': if (age < 80 || age >= 90) return false; break;
@@ -502,12 +464,10 @@
                     }
                 }
                 
-                // Time on list filter
                 if (timeFilter !== 'all') {
                     const dateReceived = new Date(vet.dateReceived);
                     const now = new Date();
                     const daysDiff = Math.floor((now - dateReceived) / (1000 * 60 * 60 * 24));
-                    
                     switch(timeFilter) {
                         case '6months+': if (daysDiff < 180) return false; break;
                         case '3-6months': if (daysDiff < 90 || daysDiff >= 180) return false; break;
@@ -515,42 +475,33 @@
                         case 'under1month': if (daysDiff >= 30) return false; break;
                     }
                 }
-                
                 return true;
             });
             
-            updateMap(filtered);
+            if (shouldUpdateMap) updateMap(filtered);
+            else updateMap(filtered); // Reuse for selection refresh
         }
 
         function loadVeterans() {
             Papa.parse(SHEET_URL, {
                 download: true,
-                header: true, // This forces it to read the Header Names (Lat, Long, etc)
+                header: true, 
                 skipEmptyLines: true,
                 transformHeader: function(header) {
-                    // This cleans up any hidden spaces or new lines in the headers
                     return header.trim().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
                 },
                 complete: function(results) {
-                    console.log('CSV Headers:', results.meta.fields);
-                    
                     allVeterans = results.data.map((row, idx) => {
-                        // Ensure we have a veteran name
                         if (!row['Veteran']) return null;
-                        
                         return {
                             id: idx,
                             dateReceived: row['Date Nominated'] || '',
                             name: row['Veteran'] || '',
-                            // TARGETING COLUMN J and K HERE:
-                            lat: row['Lat'] || '',   // Finds the column named "Lat"
-                            lng: row['Long'] || '',  // Finds the column named "Long"
-                            
+                            lat: row['Lat'] || '',
+                            lng: row['Long'] || '',
                             address: row['Address'] || '',
                             city: row['City'] || '',
                             zip: row['ZIP'] || '',
-                            
-                            // Map the rest of the fields
                             contact1Name: row['CONTACT #1 NAME (IF DIFFERENT)'] || '',
                             contact1: row['CONTACT #1'] || '',
                             contact2Name: row['CONTACT #2 NAME (IF DIFFERENT)'] || '',
@@ -564,11 +515,26 @@
                         };
                     }).filter(v => v !== null);
                     
-                    // Setup the Era Filter dropdown
+                    // Logic to separate Mapped vs Unmapped
+                    let mappedCount = 0;
+                    unmappedVeterans = [];
+
+                    allVeterans.forEach(vet => {
+                        if (parseGPS(vet)) {
+                            mappedCount++;
+                        } else {
+                            unmappedVeterans.push(vet);
+                        }
+                    });
+
+                    // Update New Stats Layout
+                    document.getElementById('totalCount').textContent = allVeterans.length;
+                    document.getElementById('mappedCount').textContent = mappedCount;
+
+                    // Era Filter
                     const uniqueEras = [...new Set(allVeterans.map(v => v.era).filter(Boolean))];
                     const eraSelect = document.getElementById('eraFilter');
                     eraSelect.innerHTML = '<option value="all">All Service Eras</option>';
-                    
                     uniqueEras.forEach(era => {
                         const option = document.createElement('option');
                         option.value = era;
@@ -576,27 +542,28 @@
                         eraSelect.appendChild(option);
                     });
                     
-                    // Update the stats numbers
-                    document.getElementById('totalCount').textContent = allVeterans.length;
-                    
-                    // Reveal the map
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('map').style.display = 'block';
                     
-                    // Initialize the map and plot the points
                     initMap();
                     filterVeterans(); 
                 }
             });
         }
 
-        // Event listeners
-        document.getElementById('search').addEventListener('input', filterVeterans);
-        document.getElementById('eraFilter').addEventListener('change', filterVeterans);
-        document.getElementById('ageFilter').addEventListener('change', filterVeterans);
-        document.getElementById('timeFilter').addEventListener('change', filterVeterans);
+        document.getElementById('search').addEventListener('input', () => filterVeterans(true));
+        document.getElementById('eraFilter').addEventListener('change', () => filterVeterans(true));
+        document.getElementById('ageFilter').addEventListener('change', () => filterVeterans(true));
+        document.getElementById('timeFilter').addEventListener('change', () => filterVeterans(true));
 
-        // Load data
+        // Click outside modal to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('unmappedModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
         loadVeterans();
     </script>
 </body>
