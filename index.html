@@ -382,7 +382,13 @@
             let btnTextId;
             let defaultText;
 
-            if (type === 'year') { filterSet = activeFilters.years; btnTextId = 'btn-text-year'; defaultText = 'All Years'; }
+            // FIX: Ensure Years are Numbers for correct filtering
+            if (type === 'year') { 
+                filterSet = activeFilters.years; 
+                btnTextId = 'btn-text-year'; 
+                defaultText = 'All Years'; 
+                value = parseInt(value); 
+            }
             if (type === 'era') { filterSet = activeFilters.eras; btnTextId = 'btn-text-era'; defaultText = 'All Service Eras'; }
             if (type === 'age') { filterSet = activeFilters.ages; btnTextId = 'btn-text-age'; defaultText = 'All Ages'; }
 
@@ -403,7 +409,7 @@
                 btnText.textContent = `${filterSet.size} Selected`;
             }
 
-            filterAndRender();
+            filterVeterans();
         }
 
         // --- Selection Logic ---

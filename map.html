@@ -326,6 +326,11 @@
         }
 
         window.onclick = function(event) {
+            // Close unmapped modal
+            const modal = document.getElementById('unmappedModal');
+            if (event.target == modal) modal.style.display = "none";
+
+            // Close dropdowns logic
             if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *')) {
                 if (!event.target.closest('.dropdown-content')) {
                     const dropdowns = document.querySelectorAll('.dropdown-content');
@@ -384,7 +389,13 @@
             let btnTextId;
             let defaultText;
 
-            if (type === 'year') { filterSet = activeFilters.years; btnTextId = 'btn-text-year'; defaultText = 'All Years'; }
+            // FIX: Ensure Years are Numbers for correct filtering
+            if (type === 'year') { 
+                filterSet = activeFilters.years; 
+                btnTextId = 'btn-text-year'; 
+                defaultText = 'All Years'; 
+                value = parseInt(value); // FIX: Ensure integer
+            }
             if (type === 'era') { filterSet = activeFilters.eras; btnTextId = 'btn-text-era'; defaultText = 'All Service Eras'; }
             if (type === 'age') { filterSet = activeFilters.ages; btnTextId = 'btn-text-age'; defaultText = 'All Ages'; }
 
@@ -709,18 +720,6 @@
 
         document.getElementById('search').addEventListener('input', () => filterVeterans(true));
         
-        // Modal Close
-        const modal = document.getElementById('unmappedModal');
-        window.onclick = function(event) {
-            if (event.target == modal) modal.style.display = "none";
-            // Dropdown close logic handled in separate listener
-            if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *')) {
-                if (!event.target.closest('.dropdown-content')) {
-                    document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
-                }
-            }
-        }
-
         loadVeterans();
     </script>
 </body>
