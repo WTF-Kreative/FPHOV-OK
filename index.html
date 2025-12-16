@@ -61,7 +61,6 @@
         .dash-label { font-size: 0.75rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; }
         body.light-mode .dash-label { color: #6b7280; }
         
-        /* Color coding for cards */
         .text-blue { color: #3b82f6; }
         .text-yellow { color: #eab308; }
         .text-red { color: #ef4444; }
@@ -208,7 +207,7 @@
         </div>
 
         <div class="filters">
-            <input type="text" id="search" class="search-box" placeholder="Search by name, address, city, notes...">
+            <input type="text" id="search" class="search-box" placeholder="Search all fields...">
             
             <div class="filter-grid">
                 <div>
@@ -272,10 +271,6 @@
         <div id="noResults" class="no-results">
             <p style="font-size: 1.25rem;">No veterans match your search criteria.</p>
         </div>
-    </div>
-
-    <div class="floating-controls">
-        <button id="btnSelectMode" class="btn-select-mode" onclick="toggleSelectionMode()">Select Mode: OFF</button>
     </div>
 
     <button id="btnReview" class="btn-review-fab" onclick="openSidebar()">
@@ -401,6 +396,17 @@
             filterAndRender();
         }
 
+        // --- Helper: Parse GPS for validation ---
+        function parseGPS(vet) {
+            let lat = vet.lat; let lng = vet.lng;
+            if (typeof lat === 'string') lat = lat.trim();
+            if (typeof lng === 'string') lng = lng.trim();
+            lat = parseFloat(lat); lng = parseFloat(lng);
+            if (isNaN(lat) || isNaN(lng)) return null;
+            if (lat < 25 || lat > 50 || lng > -65 || lng < -125) return null;
+            return [lat, lng];
+        }
+
         // --- Quick Filter Dashboard Logic ---
         function updateDashboardCounts() {
             document.getElementById('count-total').textContent = allVeterans.length;
@@ -408,7 +414,8 @@
             const noAddr = allVeterans.filter(v => !v.address || v.address.trim() === '').length;
             document.getElementById('count-no-address').textContent = noAddr;
 
-            const noGPS = allVeterans.filter(v => !v.lat || !v.lng).length;
+            // Updated to use the smart parseGPS function
+            const noGPS = allVeterans.filter(v => !parseGPS(v)).length;
             document.getElementById('count-no-gps').textContent = noGPS;
 
             const noContact = allVeterans.filter(v => !v.contact1 && !v.email).length;
@@ -570,7 +577,7 @@
                     if (vet.address && vet.address.trim() !== '') return false;
                 }
                 if (activeQuickFilter === 'no-gps') {
-                    if (vet.lat && vet.lng) return false;
+                    if (parseGPS(vet)) return false; // FIX: Using GPS parser
                 }
                 if (activeQuickFilter === 'no-contact') {
                     if (vet.contact1 || vet.email) return false;
