@@ -163,34 +163,34 @@
     </div>
 
     <script>
-        function handleLogin(e) {
-            e.preventDefault();
-            
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            const errorMsg = document.getElementById('errorMsg');
+    async function handleLogin(e) {
+        e.preventDefault();
+        
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMsg');
+        const card = document.querySelector('.login-card');
 
-            // --- CREDENTIALS CONFIGURATION ---
-            // Change these values to whatever you want
-            const VALID_USER = "admin";
-            const VALID_PASS = "FPHOV2025";
-            
-            // The name of your REAL dashboard file
-            const REDIRECT_URL = "dashboard-vets.html"; 
-            // ----------------------------------
+        errorMsg.style.display = 'none';
 
-            if (user.toLowerCase() === VALID_USER && pass === VALID_PASS) {
-                // Success: Redirect to the dashboard
-                window.location.href = REDIRECT_URL;
-            } else {
-                // Error: Show message and shake effect
-                errorMsg.style.display = 'block';
-                const card = document.querySelector('.login-card');
-                card.style.animation = 'shake 0.5s';
-                setTimeout(() => card.style.animation = '', 500);
-            }
+        // Send credentials securely to Cloudflare backend
+        const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user, pass })
+        });
+
+        if (response.ok) {
+            // Success: Secure session cookie set by server, safe to redirect
+            window.location.href = "dashboard-vets.html";
+        } else {
+            // Error: Show message and execute card shake
+            errorMsg.style.display = 'block';
+            card.style.animation = 'shake 0.5s';
+            setTimeout(() => card.style.animation = '', 500);
         }
-    </script>
+    }
+</script>
     
     <style>
         @keyframes shake {
