@@ -1,7 +1,11 @@
 name = "fphov-dashboard"
 main = "worker.js"
 compatibility_date = "2026-05-27"
-pages_build_output_dir = "."
+
+# 🛠️ THE FIX: Tells the Worker engine to bundle your frontend pages
+[assets]
+directory = "."
+binding = "ASSETS"
 
 [[kv_namespaces]]
 binding = "FPHOV_AUTH"
