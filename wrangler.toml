@@ -7,9 +7,10 @@ compatibility_date = "2026-05-27"
 directory = "."
 binding = "ASSETS"
 
-# 🗺️ THE SUBDOMAIN ROUTE FIX
+# 🗺️ CORRECTED ROUTE CONFIGURATION
 [[routes]]
-pattern = "dashboard.fphov.org/*"
+pattern = "dashboard.fphov.org"
+custom_domain = true
 
 [[kv_namespaces]]
 binding = "FPHOV_AUTH"
