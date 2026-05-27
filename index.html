@@ -9,7 +9,6 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             background-color: #111827; 
-            /* MATCHING YOUR DASHBOARD BACKGROUND */
             background-image: url('bandit-background.jpg');
             background-size: cover; 
             background-position: center; 
@@ -22,13 +21,11 @@
             position: relative;
         }
         
-        /* Dark Overlay to match dashboard feel */
         body::before {
             content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(17, 24, 39, 0.85); z-index: 0;
         }
 
-        /* The Login Card */
         .login-card {
             position: relative;
             z-index: 10;
@@ -43,7 +40,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Decorative Header Line (Red/White/Blue gradient) */
         .login-card::after {
             content: '';
             position: absolute;
@@ -71,6 +67,7 @@
         .input-group {
             margin-bottom: 1.25rem;
             text-align: left;
+            position: relative;
         }
 
         label {
@@ -99,11 +96,40 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        /* The Button - Blue default, Red hover */
+        /* Show/Hide Password Toggle Layout */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .password-wrapper input {
+            padding-right: 2.75rem; /* Make room for the text button */
+        }
+
+        .toggle-password-btn {
+            position: absolute;
+            right: 0.75rem;
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .toggle-password-btn:hover {
+            color: #3b82f6;
+        }
+
         .btn-login {
             width: 100%;
             padding: 0.75rem;
-            background-color: #1e3a8a; /* Blue */
+            background-color: #1e3a8a;
             color: white;
             border: none;
             border-radius: 0.5rem;
@@ -115,7 +141,7 @@
         }
 
         .btn-login:hover {
-            background-color: #dc2626; /* Red */
+            background-color: #dc2626;
             transform: translateY(-1px);
         }
 
@@ -159,7 +185,10 @@
             
             <div class="input-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+                <div class="password-wrapper">
+                    <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
+                    <button type="button" class="toggle-password-btn" onclick="togglePasswordVisibility()">Show</button>
+                </div>
             </div>
 
             <button type="submit" class="btn-login">SECURE LOGIN</button>
@@ -171,6 +200,20 @@
     </div>
 
     <script>
+        // Feature Added: Toggles the password field mask properties dynamically
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.querySelector('.toggle-password-btn');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleBtn.textContent = 'Hide';
+            } else {
+                passwordInput.type = 'password';
+                toggleBtn.textContent = 'Show';
+            }
+        }
+
         async function handleLogin(e) {
             e.preventDefault();
             
@@ -182,7 +225,7 @@
             errorMsg.style.display = 'none';
 
             try {
-                // Send credentials securely to Cloudflare Worker backend
+                // Hits the Cloudflare back-end engine processing edge node
                 const response = await fetch('/api/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -190,18 +233,17 @@
                 });
 
                 if (response.ok) {
-                    // Success: Secure session cookie set by server, redirect to list dashboard
+                    // Success: Cookie is stored in the pipeline browser session cache
                     window.location.href = "dashboard-vets.html";
                 } else {
-                    // Unauthorized or Bad Input: Trigger error state and card shake animation
+                    // Error: Run layout warning and card shake
                     errorMsg.textContent = "Incorrect credentials. Access denied.";
                     errorMsg.style.display = 'block';
                     card.style.animation = 'shake 0.5s';
                     setTimeout(() => card.style.animation = '', 500);
                 }
             } catch (error) {
-                // Network failure or offline backend script handler protection
-                errorMsg.textContent = "Connection error. Please try again later.";
+                errorMsg.textContent = "Connection issue. Please verify backend state.";
                 errorMsg.style.display = 'block';
             }
         }
