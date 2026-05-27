@@ -165,6 +165,14 @@
         .modal-header { padding: 1.5rem; border-bottom: 1px solid #374151; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { padding: 1.5rem; overflow-y: auto; }
         .modal-close { cursor: pointer; font-size: 1.5rem; }
+        .unmapped-item { padding: 0.75rem; border-bottom: 1px solid #374151; }
+        .unmapped-item:last-child { border-bottom: none; }
+        .marker-default { background: #dc2626; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .marker-selected { background: #fbbf24; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px #fbbf24; transform: scale(1.1); }
+        .loading { text-align: center; padding: 3rem; }
+        .flag-svg { width: 64px; height: 64px; margin: 0 auto 1rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .no-results { text-align: center; padding: 3rem; color: #9ca3af; display: none; }
 
         /* Help Sidebar */
         .help-sidebar { width: 380px; }
@@ -319,38 +327,29 @@
         <div class="sidebar-content">
             <div class="help-section-title">🗺️ How to Use the Map</div>
             <ul class="help-list">
-                <li><strong>Markers:</strong> Click any red marker to view veteran details.</li>
-                <li><strong>Selection Mode:</strong> Toggle "Select Mode: ON" then tap markers to select multiple veterans.</li>
-                <li><strong>Filters:</strong> Use the search bar and dropdowns to narrow down visible markers.</li>
-                <li><strong>Export:</strong> Select veterans → click Review button (bottom right) → Export PDF.</li>
+                <li>Click red markers to view veteran details.</li>
+                <li>Turn on "Select Mode" to select multiple veterans by tapping markers.</li>
+                <li>Use search and filters to narrow down visible markers.</li>
+                <li>Selected veterans can be exported via the Review button.</li>
             </ul>
 
             <div class="help-section-title">❓ FAQ</div>
             
             <div class="help-faq-item">
                 <button class="help-faq-trigger" onclick="toggleFaq(this)">
-                    <span>Why are some veterans not showing on the map?</span><span>▶</span>
+                    <span>Why don't some veterans appear on the map?</span><span>▶</span>
                 </button>
                 <div class="help-faq-content">
-                    They are missing valid GPS coordinates. Check the "Unmapped Veterans" link or fix the Lat/Long in the Google Sheet.
+                    They are missing valid GPS coordinates. Use the "View Unmapped Veterans" link to see them.
                 </div>
             </div>
 
             <div class="help-faq-item">
                 <button class="help-faq-trigger" onclick="toggleFaq(this)">
-                    <span>How do I select multiple veterans?</span><span>▶</span>
+                    <span>How do I select veterans for export?</span><span>▶</span>
                 </button>
                 <div class="help-faq-content">
-                    Turn on "Select Mode", then tap markers. Selected veterans appear in the Review sidebar.
-                </div>
-            </div>
-
-            <div class="help-faq-item">
-                <button class="help-faq-trigger" onclick="toggleFaq(this)">
-                    <span>What does the SURPRISE badge mean?</span><span>▶</span>
-                </button>
-                <div class="help-faq-content">
-                    The installation is meant to be a surprise. Please coordinate carefully with family contacts.
+                    Enable Select Mode, tap markers, then click the blue Review button at bottom right.
                 </div>
             </div>
         </div>
@@ -394,7 +393,7 @@
             }
         }
 
-        /* Help Sidebar Functions */
+        /* ====================== HELP FUNCTIONS ====================== */
         function openHelpSidebar() {
             closeSidebar();
             document.getElementById('helpSidebar').classList.add('active');
@@ -418,6 +417,7 @@
             }
         }
 
+        /* ====================== ORIGINAL CODE (unchanged) ====================== */
         function toggleDropdown(type) {
             const allDropdowns = document.querySelectorAll('.dropdown-content');
             const current = document.getElementById(`list-${type}`);
@@ -429,7 +429,9 @@
             const modal = document.getElementById('unmappedModal');
             if (event.target == modal) modal.style.display = "none";
             if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *')) {
-                document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
+                if (!event.target.closest('.dropdown-content')) {
+                    document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
+                }
             }
         }
 
