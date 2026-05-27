@@ -38,9 +38,9 @@
         .controls { display: flex; gap: 1rem; align-items: center; }
         .mode-toggle { background: #374151; border: 1px solid #4b5563; padding: 0.5rem; border-radius: 0.5rem; cursor: pointer; color: #f3f4f6; }
         body.light-mode .mode-toggle { background: white; border-color: #d1d5db; color: #111827; }
-        .nav-button { background: #1e40af; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500; }
+        .nav-button { background: #1e40af; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 0.35rem; }
         .nav-button:hover { background: #1e3a8a; }
-        .btn-help-nav { background: #4b5563; border: 1px solid #6b7280; }
+        .btn-help-nav { background: #4b5563; border: 1px solid #6b7280; cursor: pointer; }
         .btn-help-nav:hover { background: #374151; }
         body.light-mode .btn-help-nav { background: #e5e7eb; border-color: #d1d5db; color: #111827; }
         body.light-mode .btn-help-nav:hover { background: #d1d5db; }
@@ -83,6 +83,7 @@
         .dropdown-item:hover { background: rgba(255,255,255,0.1); }
         body.light-mode .dropdown-item:hover { background: rgba(0,0,0,0.05); }
         .dropdown-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; }
+        
         #map { height: 600px; border-radius: 0.5rem; border: 2px solid #374151; z-index: 1; }
         body.light-mode #map { border-color: #d1d5db; }
         .leaflet-popup-content-wrapper { background: #1f2937; color: #f3f4f6; }
@@ -174,8 +175,8 @@
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .no-results { text-align: center; padding: 3rem; color: #9ca3af; display: none; }
 
-        /* Help Sidebar */
-        .help-sidebar { width: 380px; }
+        /* Help Sidebar Styles */
+        .help-sidebar { width: 380px; z-index: 1600; }
         .help-section-title { 
             font-size: 0.85rem; font-weight: 700; color: #3b82f6; 
             text-transform: uppercase; letter-spacing: 0.05em; margin: 1.25rem 0 0.5rem 0; 
@@ -315,7 +316,6 @@
         </div>
     </div>
 
-    <!-- Help & FAQ Sidebar -->
     <div id="helpSidebar" class="sidebar help-sidebar">
         <div class="sidebar-header">
             <div>
@@ -327,10 +327,10 @@
         <div class="sidebar-content">
             <div class="help-section-title">🗺️ How to Use the Map</div>
             <ul class="help-list">
-                <li>Click red markers to view veteran details.</li>
-                <li>Turn on "Select Mode" to select multiple veterans by tapping markers.</li>
-                <li>Use search and filters to narrow down visible markers.</li>
-                <li>Selected veterans can be exported via the Review button.</li>
+                <li>Click red markers to view veteran details and nomination timelines.</li>
+                <li>Turn on "Select Mode" to select multiple veterans by tapping markers sequentially.</li>
+                <li>Use search and filters to narrow down visible markers contextually.</li>
+                <li>Selected veterans can be compiled and exported via the Review button layout.</li>
             </ul>
 
             <div class="help-section-title">❓ FAQ</div>
@@ -340,7 +340,7 @@
                     <span>Why don't some veterans appear on the map?</span><span>▶</span>
                 </button>
                 <div class="help-faq-content">
-                    They are missing valid GPS coordinates. Use the "View Unmapped Veterans" link to see them.
+                    They are missing valid GPS coordinates. Use the "View Unmapped Veterans" link at the top left to verify their profiles.
                 </div>
             </div>
 
@@ -349,7 +349,7 @@
                     <span>How do I select veterans for export?</span><span>▶</span>
                 </button>
                 <div class="help-faq-content">
-                    Enable Select Mode, tap markers, then click the blue Review button at bottom right.
+                    Enable Select Mode at the bottom of the screen, tap your target pins, then click the blue Review button at the bottom right.
                 </div>
             </div>
         </div>
@@ -417,7 +417,7 @@
             }
         }
 
-        /* ====================== ORIGINAL CODE (unchanged) ====================== */
+        /* ====================== ORIGINAL MAPPING LOGIC RECONCILED ====================== */
         function toggleDropdown(type) {
             const allDropdowns = document.querySelectorAll('.dropdown-content');
             const current = document.getElementById(`list-${type}`);
@@ -428,7 +428,7 @@
         window.onclick = function(event) {
             const modal = document.getElementById('unmappedModal');
             if (event.target == modal) modal.style.display = "none";
-            if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *')) {
+            if (!event.target.matches('.dropdown-btn') && !event.target.matches('.dropdown-btn *') && !event.target.matches('.btn-help-nav')) {
                 if (!event.target.closest('.dropdown-content')) {
                     document.querySelectorAll('.dropdown-content').forEach(dd => dd.classList.remove('show'));
                 }
@@ -454,10 +454,12 @@
             yearList.innerHTML = '';
             uniqueYears.sort((a,b) => a - b);
             uniqueYears.forEach(year => yearList.appendChild(createCheckbox('year', year, year)));
+            
             const eraList = document.getElementById('list-era');
             eraList.innerHTML = '';
             uniqueEras.sort();
             uniqueEras.forEach(era => eraList.appendChild(createCheckbox('era', era, era)));
+            
             const ageList = document.getElementById('list-age');
             ageList.innerHTML = '';
             const ageBuckets = ['90+', '80-89', '70-79', '60-69', '50-59', '40-49', '20-39'];
@@ -516,6 +518,7 @@
             closeHelpSidebar();
             document.getElementById('sidebar').classList.add('active');
         }
+        
         function closeSidebar() {
             document.getElementById('sidebar').classList.remove('active');
         }
@@ -613,9 +616,11 @@
             }
             document.getElementById('unmappedModal').style.display = 'flex';
         }
+        
         function closeUnmappedModal() { document.getElementById('unmappedModal').style.display = 'none'; }
 
         function initMap() {
+            if (map) return; // Prevent re-initializing leaflet errors
             map = L.map('map').setView([35.5, -97.5], 7);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
@@ -633,10 +638,12 @@
             return [lat, lng];
         }
 
+        /* Feature Added: Nomination Date added inside the map metadata popups directly */
         function createPopupContent(vet) {
             return `
                 <div class="popup-content">
                     <div class="popup-name">${vet.name}</div>
+                    <div class="popup-field" style="margin-bottom: 0.35rem; font-style: italic; color:#9ca3af;"><span class="popup-label">Date Nominated:</span> ${vet.dateReceived || 'N/A'}</div>
                     <div class="popup-field"><span class="popup-label">Address:</span> ${vet.address}</div>
                     <div class="popup-field"><span class="popup-label">City:</span> ${vet.city}, OK ${vet.zip}</div>
                     ${vet.contact1 ? `<div class="popup-field"><span class="popup-label">${vet.contact1Name || 'Contact 1'}:</span> <a href="tel:${vet.contact1}" style="color:#3b82f6">${vet.contact1}</a></div>` : ''}
@@ -651,6 +658,7 @@
         }
 
         function updateMap(filteredVets) {
+            if (!markersLayer) return;
             markersLayer.clearLayers();
             markers = [];
             filteredVets.forEach(vet => {
@@ -747,6 +755,7 @@
                     uniqueYears = Array.from(tempYears);
                     uniqueEras = Array.from(tempEras).filter(Boolean);
                     populateDropdowns();
+                    
                     let mappedCount = 0;
                     unmappedVeterans = [];
                     allVeterans.forEach(vet => {
@@ -758,6 +767,7 @@
                    
                     document.getElementById('loading').style.display = 'none';
                     document.getElementById('map').style.display = 'block';
+                    
                     initMap();
                     filterVeterans();
                 }
