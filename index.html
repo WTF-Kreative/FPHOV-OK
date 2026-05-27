@@ -59,7 +59,7 @@
             margin-bottom: 1rem;
         }
 
-        h2 {
+        <h2> {
             font-size: 1.25rem;
             font-weight: 700;
             color: #f3f4f6;
@@ -134,6 +134,14 @@
             font-size: 0.75rem;
             color: #6b7280;
         }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -146,12 +154,12 @@
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="input-group">
                 <label for="username">User</label>
-                <input type="text" id="username" placeholder="Enter username" autocomplete="username">
+                <input type="text" id="username" placeholder="Enter username" autocomplete="username" required>
             </div>
             
             <div class="input-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
+                <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" required>
             </div>
 
             <button type="submit" class="btn-login">SECURE LOGIN</button>
@@ -163,43 +171,40 @@
     </div>
 
     <script>
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             const errorMsg = document.getElementById('errorMsg');
+            const card = document.querySelector('.login-card');
 
-            // --- CREDENTIALS CONFIGURATION ---
-            // Change these values to whatever you want
-            const VALID_USER = "admin";
-            const VALID_PASS = "FPHOV2025";
-            
-            // The name of your REAL dashboard file
-            const REDIRECT_URL = "dashboard-vets.html"; 
-            // ----------------------------------
+            errorMsg.style.display = 'none';
 
-            if (user.toLowerCase() === VALID_USER && pass === VALID_PASS) {
-                // Success: Redirect to the dashboard
-                window.location.href = REDIRECT_URL;
-            } else {
-                // Error: Show message and shake effect
+            try {
+                // Send credentials securely to Cloudflare Worker backend
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user, pass })
+                });
+
+                if (response.ok) {
+                    // Success: Secure session cookie set by server, redirect to list dashboard
+                    window.location.href = "dashboard-vets.html";
+                } else {
+                    // Unauthorized or Bad Input: Trigger error state and card shake animation
+                    errorMsg.textContent = "Incorrect credentials. Access denied.";
+                    errorMsg.style.display = 'block';
+                    card.style.animation = 'shake 0.5s';
+                    setTimeout(() => card.style.animation = '', 500);
+                }
+            } catch (error) {
+                // Network failure or offline backend script handler protection
+                errorMsg.textContent = "Connection error. Please try again later.";
                 errorMsg.style.display = 'block';
-                const card = document.querySelector('.login-card');
-                card.style.animation = 'shake 0.5s';
-                setTimeout(() => card.style.animation = '', 500);
             }
         }
     </script>
-    
-    <style>
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-    </style>
 </body>
 </html>
