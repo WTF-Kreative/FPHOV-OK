@@ -523,13 +523,13 @@
             if (selectedVeterans.has(vetId)) selectedVeterans.delete(vetId);
             else selectedVeterans.add(vetId);
             updateSelectionUI();
-            filterVeterans(false);
+            filterVeterans(true);
         }
 
         function clearSelection() {
             selectedVeterans.clear();
             updateSelectionUI();
-            filterVeterans(false);
+            filterVeterans(true);
         }
 
         function getColorForYear(year) {
