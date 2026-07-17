@@ -168,8 +168,8 @@
         .modal-close { cursor: pointer; font-size: 1.5rem; }
         .unmapped-item { padding: 0.75rem; border-bottom: 1px solid #374151; }
         .unmapped-item:last-child { border-bottom: none; }
-        .marker-default { background: #dc2626; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .marker-selected { background: #fbbf24; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px #fbbf24; transform: scale(1.1); }
+        .marker-default { width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .marker-selected { width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px white; transform: scale(1.1); }
         .loading { text-align: center; padding: 3rem; }
         .flag-svg { width: 64px; height: 64px; margin: 0 auto 1rem; animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
@@ -367,6 +367,8 @@
 
     <script>
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSI7gRLdABZx7uGwBco1KH6_1MfXrOG8jHp3HZfr_3XFRF2z14dbj6WfR7tlu9gWE3t27938qZxT-a0/pub?output=csv&single=true&gid=1848702233';
+        const PRIORITY_COLORS = ['#dc2626', '#ff4500', '#fbbf24', '#a3e635', '#3b82f6']; // Red, Orange, Yellow, Lime, Blue - oldest 5 years, in order
+        const DEFAULT_COLOR = '#4b5563'; // Neutral grey for everything else
        
         let map;
         let markers = [];
@@ -512,6 +514,20 @@
             selectedVeterans.clear();
             updateSelectionUI();
             filterVeterans(false);
+        }
+
+        function getColorForYear(year) {
+            const currentYear = new Date().getFullYear();
+            // Neutral color for current year or if no year is present
+            if (!year || year.toString() === currentYear.toString()) return DEFAULT_COLOR;
+
+            // Get sorted list of all unique years present in data (oldest first)
+            const sortedYears = [...new Set(allVeterans.map(v => v.nominationYear))].filter(Boolean).sort((a, b) => a - b);
+
+            const index = sortedYears.indexOf(year);
+
+            // Use priority colors for the 5 oldest years, otherwise default grey
+            return (index !== -1 && index < 5) ? PRIORITY_COLORS[index] : DEFAULT_COLOR;
         }
 
         function openSidebar() {
@@ -666,8 +682,9 @@
                 if (!coords) return;
                 const isSelected = selectedVeterans.has(vet.id);
                 const markerClass = isSelected ? 'marker-selected' : 'marker-default';
+                const color = getColorForYear(vet.nominationYear);
                 const marker = L.marker(coords, {
-                    icon: L.divIcon({ className: 'custom-marker', html: `<div class="${markerClass}"></div>`, iconSize: [24, 24], iconAnchor: [12, 12] })
+                    icon: L.divIcon({ className: 'custom-marker', html: `<div class="${markerClass}" style="background: ${color};"></div>`, iconSize: [24, 24], iconAnchor: [12, 12] })
                 });
                 marker.bindPopup(createPopupContent(vet), { maxWidth: 300 });
                 marker.on('click', (e) => {
