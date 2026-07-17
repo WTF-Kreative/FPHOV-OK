@@ -327,7 +327,7 @@
         <div class="sidebar-content">
             <div class="help-section-title">🗺️ How to Use the Map</div>
             <ul class="help-list">
-                <li>Click red markers to view veteran details and nomination timelines.</li>
+                <li>Click a marker to view veteran details and nomination timelines. Marker color shows how long they've been waiting — see the Color Legend below.</li>
                 <li>Turn on "Select Mode" to select multiple veterans by tapping markers sequentially.</li>
                 <li>Use search and filters to narrow down visible markers contextually.</li>
                 <li>Selected veterans can be compiled and exported via the Review button layout.</li>
@@ -352,6 +352,22 @@
                     Enable Select Mode at the bottom of the screen, tap your target pins, then click the blue Review button at the bottom right.
                 </div>
             </div>
+
+            <div class="help-faq-item">
+                <button class="help-faq-trigger" onclick="toggleFaq(this)">
+                    <span>Color Legend</span><span>▶</span>
+                </button>
+                <div class="help-faq-content">
+                    Marker color shows priority based on how long a veteran has been waiting (oldest nomination dates first):
+                    <div style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.4rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:#dc2626; border:2px solid white; flex-shrink:0;"></span> Oldest — waiting the longest</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:#fbbf24; border:2px solid white; flex-shrink:0;"></span> 2nd oldest</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:#16a34a; border:2px solid white; flex-shrink:0;"></span> 3rd oldest</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:#3b82f6; border:2px solid white; flex-shrink:0;"></span> 4th oldest</div>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;"><span style="display:inline-block; width:14px; height:14px; border-radius:50%; background:#4b5563; border:2px solid white; flex-shrink:0;"></span> Everyone else — not yet a top priority</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -367,7 +383,7 @@
 
     <script>
         const SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSI7gRLdABZx7uGwBco1KH6_1MfXrOG8jHp3HZfr_3XFRF2z14dbj6WfR7tlu9gWE3t27938qZxT-a0/pub?output=csv&single=true&gid=1848702233';
-        const PRIORITY_COLORS = ['#dc2626', '#ff4500', '#fbbf24', '#a3e635', '#3b82f6']; // Red, Orange, Yellow, Lime, Blue - oldest 5 years, in order
+        const PRIORITY_COLORS = ['#dc2626', '#fbbf24', '#16a34a', '#3b82f6']; // Red, Yellow, Green, Blue - oldest 4 years, in order
         const DEFAULT_COLOR = '#4b5563'; // Neutral grey for everything else
        
         let map;
@@ -527,7 +543,7 @@
             const index = sortedYears.indexOf(year);
 
             // Use priority colors for the 5 oldest years, otherwise default grey
-            return (index !== -1 && index < 5) ? PRIORITY_COLORS[index] : DEFAULT_COLOR;
+            return (index !== -1 && index < 4) ? PRIORITY_COLORS[index] : DEFAULT_COLOR;
         }
 
         function openSidebar() {
